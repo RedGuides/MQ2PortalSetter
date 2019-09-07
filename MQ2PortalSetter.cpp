@@ -2,7 +2,7 @@
 // Author: DigitalPixel
 // Version: October 31, 2014 6:45 PM
 // Updated for Burning Lands - Dewey 12-11-2018
-#include "../MQ2Plugin.h"
+#include <MQ2Plugin.h>
 
 PreSetup("MQ2PortalSetter");
 
@@ -18,7 +18,6 @@ static void setPortal();
 class CPortalSetterWindow : public CCustomWnd {
  public:
   CPortalSetterWindow(char *Template):CCustomWnd(Template) {
-    SetWndNotification(CPortalSetterWindow);
 	Stratos_button            = (CButtonWnd*)GetChildItem("StratosButton");
 	Overthere_button          = (CButtonWnd*)GetChildItem("OverthereButton");
 	Lceanium_button			  = (CButtonWnd*)GetChildItem("LceaniumButton");
@@ -448,7 +447,7 @@ static void setPortal() {
       break;
     }
     case 3: {
-      PCONTENTS stone = FindItemByName(portalStoneName, true);
+	  CONTENTS* stone = FindItemByName(portalStoneName, true);
       if(stone) {
         char zNotifyCommand[MAX_STRING];
         pCPortalSetterWindow->SetVisible(0);
@@ -465,7 +464,7 @@ static void setPortal() {
       break;
     }
     case 5: {
-      if ((PSPAWNINFO)pTarget && inPortalMerchantRange()) {
+      if (pTarget && inPortalMerchantRange()) {
         if (GetCharInfo2()->pInventoryArray->Inventory.Cursor) {
           EzCommand("/click left target");
           currentRoutineStep++;
@@ -473,13 +472,13 @@ static void setPortal() {
       } else {
         currentRoutineStep--;
       }
-      if (((PCSIDLWND)pGiveWnd)->IsVisible() && currentRoutineStep == 5) {
+      if (pGiveWnd->IsVisible() && currentRoutineStep == 5) {
         currentRoutineStep++;
       }
       break;
     }
     case 6: {
-      if (((PCSIDLWND)pGiveWnd)->IsVisible()) {
+      if (pGiveWnd->IsVisible()) {
         SendWndClick("GiveWnd", "GVW_Give_Button", "leftmouseup");
         currentRoutineStep++;
       } else {
@@ -488,7 +487,7 @@ static void setPortal() {
       break;
     }
     case 7: {
-      if(!((PCSIDLWND)pGiveWnd)->IsVisible()) {
+      if(!pGiveWnd->IsVisible()) {
         currentRoutineStep = 0;
       }
       break;
@@ -550,7 +549,7 @@ PLUGIN_API VOID OnPulse(VOID)
 	if (!pCPortalSetterWindow) return;
 
 	//-- Check to see if we need to hide / show the portal window
-	if (((PCSIDLWND)pMerchantWnd)->IsVisible() == true) {
+	if (pMerchantWnd->IsVisible() == true) {
 		if (currentRoutineStep < 4) {
 			if(pCPortalSetterWindow->IsVisible() == false && inPortalMerchantRange() && isMerchantPortalSetter()) {
 				pCPortalSetterWindow->SetVisible(true);
