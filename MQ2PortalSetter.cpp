@@ -2,7 +2,7 @@
 // Author: DigitalPixel
 // Version: October 31, 2014 6:45 PM
 // Updated for Burning Lands - Dewey 12-11-2018
-#include <MQ2Plugin.h>
+#include <mq/Plugin.h>
 
 PreSetup("MQ2PortalSetter");
 
