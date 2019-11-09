@@ -421,7 +421,7 @@ static bool inGuildHall() {
 
 static void setPortal() {
   if (currentRoutineStep == 1) {
-    if (GetCharInfo2()->pInventoryArray->Inventory.Cursor) {
+    if (GetPcProfile()->pInventoryArray->Inventory.Cursor) {
       WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
       currentRoutineStep = 0;
     }
@@ -465,7 +465,7 @@ static void setPortal() {
     }
     case 5: {
       if (pTarget && inPortalMerchantRange()) {
-        if (GetCharInfo2()->pInventoryArray->Inventory.Cursor) {
+        if (GetPcProfile()->pInventoryArray->Inventory.Cursor) {
           EzCommand("/click left target");
           currentRoutineStep++;
         } 
