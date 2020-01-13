@@ -18,6 +18,7 @@ static void setPortal();
 class CPortalSetterWindow : public CCustomWnd {
  public:
   CPortalSetterWindow(char *Template):CCustomWnd(Template) {
+  	EasternWasteTwo_Button	  = (CButtonWnd*)GetChildItem("EasternWastesTwoButton");
 	Stratos_button            = (CButtonWnd*)GetChildItem("StratosButton");
 	Overthere_button          = (CButtonWnd*)GetChildItem("OverthereButton");
 	Lceanium_button			  = (CButtonWnd*)GetChildItem("LceaniumButton");
@@ -54,6 +55,7 @@ class CPortalSetterWindow : public CCustomWnd {
 
   int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
 
+  CButtonWnd* EasternWasteTwo_Button;
   CButtonWnd *Stratos_button;
   CButtonWnd *Overthere_button;
   CButtonWnd *Lceanium_button;
@@ -93,6 +95,17 @@ int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void
         return 1;
     }
   }
+  if (pWnd == (CXWnd*)EasternWasteTwo_Button) {
+	  if (Message == XWM_LCLICK) {
+			#ifdef MQ2PORTALSETTER_DEBUG
+			WriteChatf("PortalSetterWindow::EasternWasteTwo_Button - LCLICK");
+			#endif
+		  sprintf_s(portalStoneName, "Brilliant Frigid Gemstone");
+		  currentRoutineStep = 1;
+		  setPortal();
+	  }
+  }
+
   if (pWnd == (CXWnd*)Stratos_button) {
 	  if (Message == XWM_LCLICK) {
 			#ifdef MQ2PORTALSETTER_DEBUG
