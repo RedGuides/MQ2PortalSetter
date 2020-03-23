@@ -5,6 +5,7 @@
 #include <mq/Plugin.h>
 
 PreSetup("MQ2PortalSetter");
+PLUGIN_VERSION(2019.1223);
 
 //#define MQ2PORTALSETTER_DEBUG
 
