@@ -22,7 +22,7 @@
 		</TextColor>
 		<Template>BDT_BigNormal</Template>
 	</Button>
-	
+
   <Button item="EasternWastesTwoButton">
     <ScreenID>EasternWastesTwoButton</ScreenID>
       <Location>
@@ -60,7 +60,7 @@
     </TextColor>
     <Template>BDT_BigNormal</Template>
   </Button>
-	
+
 
   <Button item="OverthereButton">
     <ScreenID>OverthereButton</ScreenID>
@@ -641,7 +641,7 @@
 		<Style_Minimizebox>true</Style_Minimizebox>
 		<Style_Border>true</Style_Border>
 		<Style_Sizable>false</Style_Sizable>
-		
+
 		<Pieces>EasternWastesTwoButton</Pieces>
 		<Pieces>StratosButton</Pieces>
 		<Pieces>OverthereButton</Pieces>
@@ -673,6 +673,6 @@
 		<Pieces>NorthKaranaButton</Pieces>
 		<Pieces>CommonlandsButton</Pieces>
 		<Pieces>GreaterFaydarkButton</Pieces>
-	
+
   </Screen>
 </XML>
