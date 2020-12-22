@@ -7,8 +7,6 @@
 PreSetup("MQ2PortalSetter");
 PLUGIN_VERSION(2019.1223);
 
-//#define MQ2PORTALSETTER_DEBUG
-
 bool pluginEnabled = false;
 int currentRoutineStep = 0;
 unsigned long nextCommandAtTick = 0;
@@ -100,9 +98,9 @@ int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void
 
   if (pWnd == (CXWnd*)CobaltScarTwo_Button) {
       if (Message == XWM_LCLICK) {
-#ifdef MQ2PORTALSETTER_DEBUG
+          #ifdef MQ2PORTALSETTER_DEBUG
           WriteChatf("PortalSetterWindow::CobaltScarTwo_Button - LCLICK");
-#endif
+          #endif
           sprintf_s(portalStoneName, "Othmir Clamshell");
           currentRoutineStep = 1;
           setPortal();
@@ -110,47 +108,47 @@ int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void
   }
 
   if (pWnd == (CXWnd*)EasternWasteTwo_Button) {
-	  if (Message == XWM_LCLICK) {
+    if (Message == XWM_LCLICK) {
 			#ifdef MQ2PORTALSETTER_DEBUG
 			WriteChatf("PortalSetterWindow::EasternWasteTwo_Button - LCLICK");
 			#endif
-		  sprintf_s(portalStoneName, "Brilliant Frigid Gemstone");
-		  currentRoutineStep = 1;
-		  setPortal();
-	  }
+      sprintf_s(portalStoneName, "Brilliant Frigid Gemstone");
+      currentRoutineStep = 1;
+      setPortal();
+    }
   }
 
   if (pWnd == (CXWnd*)Stratos_button) {
-	  if (Message == XWM_LCLICK) {
+    if (Message == XWM_LCLICK) {
 			#ifdef MQ2PORTALSETTER_DEBUG
 			WriteChatf("PortalSetterWindow::Stratos_button - LCLICK");
 			#endif
-		  sprintf_s(portalStoneName, "Burning Lamp");
-		  currentRoutineStep = 1;
-		  setPortal();
-	  }
+      sprintf_s(portalStoneName, "Burning Lamp");
+      currentRoutineStep = 1;
+      setPortal();
+    }
   }
 
   if (pWnd == (CXWnd*)Overthere_button) {
-	  if (Message == XWM_LCLICK) {
+    if (Message == XWM_LCLICK) {
 			#ifdef MQ2PORTALSETTER_DEBUG
 			WriteChatf("PortalSetterWindow::Overthere_button - LCLICK");
 			#endif
-		  sprintf_s(portalStoneName, "Miniature Worker's Sledge Mallet");
-		  currentRoutineStep = 1;
-		  setPortal();
-	  }
+      sprintf_s(portalStoneName, "Miniature Worker's Sledge Mallet");
+      currentRoutineStep = 1;
+      setPortal();
+    }
   }
 
   if (pWnd == (CXWnd*)Lceanium_button) {
-	  if (Message == XWM_LCLICK) {
-		  #ifdef MQ2PORTALSETTER_DEBUG
-		  WriteChatf("PortalSetterWindow::Lceanim_button - LCLICK");
-		  #endif
-		  sprintf_s(portalStoneName, "Fragment of the Combine Spire");
-		  currentRoutineStep = 1;
-		  setPortal();
-	  }
+    if (Message == XWM_LCLICK) {
+      #ifdef MQ2PORTALSETTER_DEBUG
+      WriteChatf("PortalSetterWindow::Lceanim_button - LCLICK");
+      #endif
+      sprintf_s(portalStoneName, "Fragment of the Combine Spire");
+      currentRoutineStep = 1;
+      setPortal();
+    }
   } else if (pWnd==(CXWnd*)kattaCastrumDeluge_button) {
     if(Message==XWM_LCLICK) {
       #ifdef MQ2PORTALSETTER_DEBUG
@@ -474,7 +472,7 @@ static void setPortal() {
       break;
     }
     case 3: {
-	  CONTENTS* stone = FindItemByName(portalStoneName, true);
+      CONTENTS* stone = FindItemByName(portalStoneName, true);
       if(stone) {
         char zNotifyCommand[MAX_STRING];
         pCPortalSetterWindow->SetVisible(0);
