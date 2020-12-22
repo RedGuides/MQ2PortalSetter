@@ -19,10 +19,11 @@ static void setPortal();
 class CPortalSetterWindow : public CCustomWnd {
  public:
   CPortalSetterWindow(char *Template):CCustomWnd(Template) {
-  	EasternWasteTwo_Button	  = (CButtonWnd*)GetChildItem("EasternWastesTwoButton");
-	Stratos_button            = (CButtonWnd*)GetChildItem("StratosButton");
-	Overthere_button          = (CButtonWnd*)GetChildItem("OverthereButton");
-	Lceanium_button			  = (CButtonWnd*)GetChildItem("LceaniumButton");
+    CobaltScarTwo_Button      = (CButtonWnd*)GetChildItem("CobaltScarTwoButton");
+    EasternWasteTwo_Button    = (CButtonWnd*)GetChildItem("EasternWastesTwoButton");
+    Stratos_button            = (CButtonWnd*)GetChildItem("StratosButton");
+    Overthere_button          = (CButtonWnd*)GetChildItem("OverthereButton");
+    Lceanium_button           = (CButtonWnd*)GetChildItem("LceaniumButton");
     kattaCastrumDeluge_button = (CButtonWnd*)GetChildItem("KattaCastrumDelugeButton");
     westKarana_button         = (CButtonWnd*)GetChildItem("WestKaranaButton");
     shardsLanding_button      = (CButtonWnd*)GetChildItem("ShardsLandingButton");
@@ -55,7 +56,7 @@ class CPortalSetterWindow : public CCustomWnd {
   ~CPortalSetterWindow() {}
 
   int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
-
+  CButtonWnd* CobaltScarTwo_Button;
   CButtonWnd* EasternWasteTwo_Button;
   CButtonWnd *Stratos_button;
   CButtonWnd *Overthere_button;
@@ -95,6 +96,17 @@ int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void
         SetVisible(1);
         return 1;
     }
+  }
+
+  if (pWnd == (CXWnd*)CobaltScarTwo_Button) {
+      if (Message == XWM_LCLICK) {
+#ifdef MQ2PORTALSETTER_DEBUG
+          WriteChatf("PortalSetterWindow::CobaltScarTwo_Button - LCLICK");
+#endif
+          sprintf_s(portalStoneName, "Othmir Clamshell");
+          currentRoutineStep = 1;
+          setPortal();
+      }
   }
 
   if (pWnd == (CXWnd*)EasternWasteTwo_Button) {
