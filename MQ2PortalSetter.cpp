@@ -2,6 +2,9 @@
 // Author: DigitalPixel
 // Version: October 31, 2014 6:45 PM
 // Updated for Burning Lands - Dewey 12-11-2018
+
+// FIXME:  All the ParseMacroData calls are unnecessary.
+
 #include <mq/Plugin.h>
 
 PreSetup("MQ2PortalSetter");
@@ -10,9 +13,9 @@ PLUGIN_VERSION(2019.1223);
 bool pluginEnabled = false;
 int currentRoutineStep = 0;
 unsigned long nextCommandAtTick = 0;
-char portalStoneName[MAX_STRING];
+std::string portalStoneName;
 
-static void setPortal();
+void setPortal(std::string setPortalStoneName);
 
 class CPortalSetterWindow : public CCustomWnd {
  public:
@@ -56,359 +59,136 @@ class CPortalSetterWindow : public CCustomWnd {
   int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
   CButtonWnd* CobaltScarTwo_Button;
   CButtonWnd* EasternWasteTwo_Button;
-  CButtonWnd *Stratos_button;
-  CButtonWnd *Overthere_button;
-  CButtonWnd *Lceanium_button;
-  CButtonWnd *kattaCastrumDeluge_button;
-  CButtonWnd *westKarana_button;
-  CButtonWnd *shardsLanding_button;
-  CButtonWnd *argath_button;
-  CButtonWnd *guildBanner_button;
-  CButtonWnd *feerrott_button;
-  CButtonWnd *brellsRest_button;
-  CButtonWnd *dragonscaleHills_button;
-  CButtonWnd *planeOfTime_button;
-  CButtonWnd *kattaCastrum_button;
-  CButtonWnd *gorukarMesa_button;
-  CButtonWnd *arcstone_button;
-  CButtonWnd *planeOfSky_button;
-  CButtonWnd *cobaltScar_button;
-  CButtonWnd *planeOfHate_button;
-  CButtonWnd *barindu_button;
-  CButtonWnd *wallOfSlaughter_button;
-  CButtonWnd *twilightSea_button;
-  CButtonWnd *undershore_button;
-  CButtonWnd *dreadlands_button;
-  CButtonWnd *stonebrunt_button;
-  CButtonWnd *icecladOcean_button;
-  CButtonWnd *lavastorm_button;
-  CButtonWnd *toxxulia_button;
-  CButtonWnd *northKarana_button;
-  CButtonWnd *commonlands_button;
-  CButtonWnd *greaterFaydark_button;
+  CButtonWnd* Stratos_button;
+  CButtonWnd* Overthere_button;
+  CButtonWnd* Lceanium_button;
+  CButtonWnd* kattaCastrumDeluge_button;
+  CButtonWnd* westKarana_button;
+  CButtonWnd* shardsLanding_button;
+  CButtonWnd* argath_button;
+  CButtonWnd* guildBanner_button;
+  CButtonWnd* feerrott_button;
+  CButtonWnd* brellsRest_button;
+  CButtonWnd* dragonscaleHills_button;
+  CButtonWnd* planeOfTime_button;
+  CButtonWnd* kattaCastrum_button;
+  CButtonWnd* gorukarMesa_button;
+  CButtonWnd* arcstone_button;
+  CButtonWnd* planeOfSky_button;
+  CButtonWnd* cobaltScar_button;
+  CButtonWnd* planeOfHate_button;
+  CButtonWnd* barindu_button;
+  CButtonWnd* wallOfSlaughter_button;
+  CButtonWnd* twilightSea_button;
+  CButtonWnd* undershore_button;
+  CButtonWnd* dreadlands_button;
+  CButtonWnd* stonebrunt_button;
+  CButtonWnd* icecladOcean_button;
+  CButtonWnd* lavastorm_button;
+  CButtonWnd* toxxulia_button;
+  CButtonWnd* northKarana_button;
+  CButtonWnd* commonlands_button;
+  CButtonWnd* greaterFaydark_button;
 };
 
 int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown) {
   if (pWnd==0) {
     if (Message==XWM_CLOSE) {
-        SetVisible(1);
+        SetVisible(true);
         return 1;
     }
   }
 
-  if (pWnd == (CXWnd*)CobaltScarTwo_Button) {
-      if (Message == XWM_LCLICK) {
-          #ifdef MQ2PORTALSETTER_DEBUG
-          WriteChatf("PortalSetterWindow::CobaltScarTwo_Button - LCLICK");
-          #endif
-          sprintf_s(portalStoneName, "Othmir Clamshell");
-          currentRoutineStep = 1;
-          setPortal();
-      }
-  }
+  if (Message == XWM_LCLICK) {
+    currentRoutineStep = 1;
+    if (pWnd == (CXWnd*)CobaltScarTwo_Button) {
+      portalStoneName = "Othmir Clamshell";
+    } else if (pWnd == (CXWnd*)EasternWasteTwo_Button) {
+      portalStoneName = "Brilliant Frigid Gemstone";
+    } else if (pWnd == (CXWnd*)Stratos_button) {
+      portalStoneName = "Burning Lamp";
+    } else if (pWnd == (CXWnd*)Overthere_button) {
+      portalStoneName = "Miniature Worker's Sledge Mallet";
+    } else if (pWnd == (CXWnd*)Lceanium_button) {
+      portalStoneName = "Fragment of the Combine Spire";
+    } else if (pWnd==(CXWnd*)kattaCastrumDeluge_button) {
+      portalStoneName = "Drowned Katta Castrum Powerstone";
+    } else if (pWnd==(CXWnd*)westKarana_button) {
+      portalStoneName = "Stormstone of the West";
+    } else if(pWnd==(CXWnd*)shardsLanding_button) {
+      portalStoneName = "Stone of the Shard's Fall";
+    } else if(pWnd==(CXWnd*)argath_button) {
+      portalStoneName = "Chunk of Argathian Steel";
+    } else if(pWnd==(CXWnd*)guildBanner_button) {
+      portalStoneName = "Splinter from a Guild Standard";
+    } else if(pWnd==(CXWnd*)feerrott_button) {
+      portalStoneName = "Crystallized Dream of the Feerrott";
+    } else if(pWnd==(CXWnd*)brellsRest_button) {
+      portalStoneName = "Unrefined Brellium Ore";
+    } else if(pWnd==(CXWnd*)dragonscaleHills_button) {
+      portalStoneName = "Dragonscale Faycite";
+    } else if(pWnd==(CXWnd*)planeOfTime_button) {
+      portalStoneName = "Broken Timestone";
+    } else if(pWnd==(CXWnd*)kattaCastrum_button) {
+      portalStoneName = "Katta Castrum Powerstone";
+    } else if(pWnd==(CXWnd*)gorukarMesa_button) {
+      portalStoneName = "Goru'kar Mesa Sandstone";
+    } else if(pWnd==(CXWnd*)arcstone_button) {
+      portalStoneName = "Arcstone Spirit Sapphire";
+    } else if(pWnd==(CXWnd*)planeOfSky_button) {
+      portalStoneName = "Cloudy Stone of Veeshan";
+    } else if(pWnd==(CXWnd*)cobaltScar_button) {
+      portalStoneName = "Velium Shard of Cobalt Scar";
+    } else if(pWnd==(CXWnd*)planeOfHate_button) {
+      portalStoneName = "Fuligan Soulstone of Innoruuk";
+    } else if(pWnd==(CXWnd*)barindu_button) {
+      portalStoneName = "Etched Marble of Barindu";
+    } else if(pWnd==(CXWnd*)wallOfSlaughter_button) {
+      portalStoneName = "Chipped Shard of Slaughter";
+    } else if(pWnd==(CXWnd*)twilightSea_button) {
+      portalStoneName = "Shadowed Sand of the Twilight Sea";
+    } else if(pWnd==(CXWnd*)undershore_button) {
+      portalStoneName = "Undershore Coral";
+    } else if(pWnd==(CXWnd*)dreadlands_button) {
+      portalStoneName = "Shattered Bone of the Dreadlands";
+    } else if(pWnd==(CXWnd*)stonebrunt_button) {
+      portalStoneName = "Moss Agate of Stonebrunt";
+    } else if(pWnd==(CXWnd*)icecladOcean_button) {
+      portalStoneName = "Frozen Shard of Iceclad";
+    } else if(pWnd==(CXWnd*)lavastorm_button) {
+      portalStoneName = "Lavastorm Magma";
+    } else if(pWnd==(CXWnd*)toxxulia_button) {
+      portalStoneName = "Opal of Toxxulia";
+    } else if(pWnd==(CXWnd*)northKarana_button) {
+      portalStoneName = "Karana Plains Pebble";
+    } else if(pWnd==(CXWnd*)commonlands_button) {
+      portalStoneName = "Grassy Pebble Of The Commonlands";
+    } else if(pWnd==(CXWnd*)greaterFaydark_button) {
+      portalStoneName = "Forest Emerald of Faydark";
+    } else {
+      currentRoutineStep = 0;
+    }
 
-  if (pWnd == (CXWnd*)EasternWasteTwo_Button) {
-    if (Message == XWM_LCLICK) {
-			#ifdef MQ2PORTALSETTER_DEBUG
-			WriteChatf("PortalSetterWindow::EasternWasteTwo_Button - LCLICK");
-			#endif
-      sprintf_s(portalStoneName, "Brilliant Frigid Gemstone");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  }
-
-  if (pWnd == (CXWnd*)Stratos_button) {
-    if (Message == XWM_LCLICK) {
-			#ifdef MQ2PORTALSETTER_DEBUG
-			WriteChatf("PortalSetterWindow::Stratos_button - LCLICK");
-			#endif
-      sprintf_s(portalStoneName, "Burning Lamp");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  }
-
-  if (pWnd == (CXWnd*)Overthere_button) {
-    if (Message == XWM_LCLICK) {
-			#ifdef MQ2PORTALSETTER_DEBUG
-			WriteChatf("PortalSetterWindow::Overthere_button - LCLICK");
-			#endif
-      sprintf_s(portalStoneName, "Miniature Worker's Sledge Mallet");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  }
-
-  if (pWnd == (CXWnd*)Lceanium_button) {
-    if (Message == XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::Lceanim_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Fragment of the Combine Spire");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if (pWnd==(CXWnd*)kattaCastrumDeluge_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::kattaCastrumDeluge_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Drowned Katta Castrum Powerstone");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if (pWnd==(CXWnd*)westKarana_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::westKarana_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Stormstone of the West");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)shardsLanding_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::shardsLanding_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Stone of the Shard's Fall");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)argath_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::argath_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Chunk of Argathian Steel");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)guildBanner_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::guildBanner_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Splinter from a Guild Standard");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)feerrott_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::feerrott_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Crystallized Dream of the Feerrott");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)brellsRest_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::brellsRest_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Unrefined Brellium Ore");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)dragonscaleHills_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::dragonscaleHills_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Dragonscale Faycite");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)planeOfTime_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::planeOfTime_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Broken Timestone");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)kattaCastrum_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::kattaCastrum_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Katta Castrum Powerstone");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)gorukarMesa_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::gorukarMesa_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Goru'kar Mesa Sandstone");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)arcstone_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::arcstone_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Arcstone Spirit Sapphire");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)planeOfSky_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::planeOfSky_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Cloudy Stone of Veeshan");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)cobaltScar_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::cobaltScar_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Velium Shard of Cobalt Scar");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)planeOfHate_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::planeOfHate_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Fuligan Soulstone of Innoruuk");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)barindu_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::barindu_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Etched Marble of Barindu");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)wallOfSlaughter_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::wallOfSlaughter_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Chipped Shard of Slaughter");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)twilightSea_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::twilightSea_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Shadowed Sand of the Twilight Sea");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)undershore_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::undershore_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Undershore Coral");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)dreadlands_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::dreadlands_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Shattered Bone of the Dreadlands");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)stonebrunt_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::stonebrunt_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Moss Agate of Stonebrunt");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)icecladOcean_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::icecladOcean_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Frozen Shard of Iceclad");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)lavastorm_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::lavastorm_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Lavastorm Magma");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)toxxulia_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::toxxulia_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Opal of Toxxulia");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)northKarana_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::northKarana_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Karana Plains Pebble");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)commonlands_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::commonlands_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Grassy Pebble Of The Commonlands");
-      currentRoutineStep = 1;
-      setPortal();
-    }
-  } else if(pWnd==(CXWnd*)greaterFaydark_button) {
-    if(Message==XWM_LCLICK) {
-      #ifdef MQ2PORTALSETTER_DEBUG
-      WriteChatf("PortalSetterWindow::greaterFaydark_button - LCLICK");
-      #endif
-      sprintf_s(portalStoneName, "Forest Emerald of Faydark");
-      currentRoutineStep = 1;
-      setPortal();
+    if (currentRoutineStep == 1) {
+      setPortal(portalStoneName);
     }
   }
   return CSidlScreenWnd::WndNotification(pWnd,Message,unknown);
 };
 
-CPortalSetterWindow *pCPortalSetterWindow=0;
+CPortalSetterWindow *pCPortalSetterWindow = nullptr;
 
 void CreatePortalSetterWindow() {
   if (pCPortalSetterWindow) return;
   pCPortalSetterWindow = new CPortalSetterWindow("PortalSetterWindow");
-  pCPortalSetterWindow->SetVisible(0);
+  pCPortalSetterWindow->SetVisible(false);
   pCPortalSetterWindow->SetZLayer(9999);
 };
 
 void DestroyPortalSetterWindow() {
   if (!pCPortalSetterWindow) return;
   delete pCPortalSetterWindow;
-  pCPortalSetterWindow=0;
+  pCPortalSetterWindow = nullptr;
 };
 
 static char* getPortalVendorName() {
@@ -444,7 +224,7 @@ static bool inGuildHall() {
   return false;
 }
 
-static void setPortal() {
+void setPortal(std::string setPortalStoneName) {
   if (currentRoutineStep == 1) {
     if (GetPcProfile()->pInventoryArray->Inventory.Cursor) {
       WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
@@ -460,7 +240,7 @@ static void setPortal() {
   switch (currentRoutineStep) {
     case 1: {
       char zStoneListPosition[MAX_STRING];
-      sprintf_s(zStoneListPosition, "${Window[MerchantWnd].Child[MW_ItemList].List[=%s,2]}", portalStoneName);
+      sprintf_s(zStoneListPosition, "${Window[MerchantWnd].Child[MW_ItemList].List[=%s,2]}", &setPortalStoneName[0]);
       ParseMacroData(zStoneListPosition, MAX_STRING);
       SendListSelect("MerchantWnd", "MW_ItemList", (atoi(zStoneListPosition) - 1));
       currentRoutineStep++;
@@ -472,12 +252,12 @@ static void setPortal() {
       break;
     }
     case 3: {
-      CONTENTS* stone = FindItemByName(portalStoneName, true);
+      CONTENTS* stone = FindItemByName(&setPortalStoneName[0], true);
       if(stone) {
         char zNotifyCommand[MAX_STRING];
         pCPortalSetterWindow->SetVisible(0);
         SendWndClick("MerchantWnd", "MW_DONE_BUTTON", "leftmouseup");
-        sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", portalStoneName);
+        sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", &setPortalStoneName[0]);
         EzCommand(zNotifyCommand);
         currentRoutineStep++;
       }
@@ -520,35 +300,35 @@ static void setPortal() {
   }
 };
 
-PLUGIN_API void InitializePlugin(void)
+PLUGIN_API void InitializePlugin()
 {
   DebugSpewAlways("Initializing MQ2PortalSetter");
   AddXMLFile("MQUI_PortalSetterWindow.xml");
 }
 
-PLUGIN_API VOID ShutdownPlugin(VOID)
+PLUGIN_API void ShutdownPlugin()
 {
   DebugSpewAlways("Shutting down MQ2PortalSetter");
   DestroyPortalSetterWindow();
   RemoveXMLFile("MQUI_PortalSetterWindow.xml");
 }
 
-PLUGIN_API VOID OnCleanUI(VOID)
+PLUGIN_API void OnCleanUI()
 {
   DebugSpewAlways("MQ2PortalSetter::OnCleanUI()");
   DestroyPortalSetterWindow();
 }
 
-PLUGIN_API VOID OnReloadUI(VOID)
+PLUGIN_API void OnReloadUI()
 {
   DebugSpewAlways("MQ2PortalSetter::OnReloadUI()");
   CreatePortalSetterWindow();
 }
 
-PLUGIN_API VOID SetGameState(DWORD GameState)
+PLUGIN_API void SetGameState(int GameState)
 {
   DebugSpewAlways("MQ2PortalSetter::SetGameState()");
-  if (gGameState == GAMESTATE_INGAME) {
+  if (GameState == GAMESTATE_INGAME) {
     if(inGuildHall()) {
       if (!pluginEnabled) {
         pluginEnabled = true;
@@ -591,6 +371,6 @@ PLUGIN_API VOID OnPulse(VOID)
 		WriteChatColor("[MQ2PortalSetter] Out of range of portal attendant, aborting.", CONCOLOR_RED);
 		currentRoutineStep = 0;
 	}
-	setPortal();
+	setPortal(portalStoneName);
 	nextCommandAtTick = currentTick + 60;
 }
