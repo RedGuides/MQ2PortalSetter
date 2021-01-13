@@ -226,7 +226,7 @@ static bool inGuildHall() {
 
 void setPortal(std::string setPortalStoneName) {
   if (currentRoutineStep == 1) {
-    if (GetPcProfile()->pInventoryArray->Inventory.Cursor) {
+    if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
       WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
       currentRoutineStep = 0;
     }
@@ -270,7 +270,7 @@ void setPortal(std::string setPortalStoneName) {
     }
     case 5: {
       if (pTarget && inPortalMerchantRange()) {
-        if (GetPcProfile()->pInventoryArray->Inventory.Cursor) {
+        if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
           EzCommand("/click left target");
           currentRoutineStep++;
         }
