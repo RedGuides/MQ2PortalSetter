@@ -221,11 +221,7 @@ bool inPortalMerchantRange() {
 	ClearSearchSpawn(&ssSpawn);
 	ssSpawn.Radius = 20;
 	ParseSearchSpawn(getPortalVendorName(), &ssSpawn);
-	if (SearchThroughSpawns(&ssSpawn, pControlledPlayer))
-	{
-		return true;
-	}
-	return false;
+	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
 }
 
 void setPortal(std::string setPortalStoneName) {
