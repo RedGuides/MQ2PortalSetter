@@ -220,6 +220,7 @@ bool inPortalMerchantRange() {
 	MQSpawnSearch ssSpawn;
 	ClearSearchSpawn(&ssSpawn);
 	ssSpawn.Radius = 20;
+	ssSpawn.SpawnType = NPC;
 	ParseSearchSpawn(getPortalVendorName(), &ssSpawn);
 	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
 }
