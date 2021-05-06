@@ -219,10 +219,11 @@ bool isMerchantPortalSetter() {
 bool inPortalMerchantRange() {
 	MQSpawnSearch ssSpawn;
 	ClearSearchSpawn(&ssSpawn);
+	ssSpawn.Radius = 20;
 	ParseSearchSpawn(getPortalVendorName(), &ssSpawn);
-	if (SPAWNINFO* portalMerchantSpawn = SearchThroughSpawns(&ssSpawn, pControlledPlayer))
+	if (SearchThroughSpawns(&ssSpawn, pControlledPlayer))
 	{
-		return GetDistanceSquared(portalMerchantSpawn->X, portalMerchantSpawn->Y, pLocalPlayer->X, pLocalPlayer->Y) < 400;
+		return true;
 	}
 	return false;
 }
