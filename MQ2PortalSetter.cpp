@@ -198,7 +198,7 @@ void DestroyPortalSetterWindow() {
 
 // char* for Target to work
 char* getPortalVendorName() {
-	if ((pLocalPlayer->Zone & 0x7FFF) == ZONEID_GUILD_HALL)
+	if (pLocalPC->zoneId == ZONEID_GUILD_HALL)
 		return "Zeflmin Werlikanin";
 	return "Teleportation Assistant";
 }
@@ -219,9 +219,9 @@ bool isMerchantPortalSetter() {
 bool inPortalMerchantRange() {
 	MQSpawnSearch ssSpawn;
 	ClearSearchSpawn(&ssSpawn);
-	ssSpawn.Radius = 20;
+	ssSpawn.FRadius = 20;
 	ssSpawn.SpawnType = NPC;
-	ParseSearchSpawn(getPortalVendorName(), &ssSpawn);
+	strcpy_s(ssSpawn.szName, getPortalVendorName());
 	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
 }
 
