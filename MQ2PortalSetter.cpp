@@ -8,9 +8,10 @@
 #include <mq/Plugin.h>
 
 PreSetup("MQ2PortalSetter");
-PLUGIN_VERSION(2019.1223);
+PLUGIN_VERSION(2021.0504);
 
-bool pluginEnabled = false;
+constexpr int ZONEID_GUILD_HALL = 345;
+
 int currentRoutineStep = 0;
 unsigned long nextCommandAtTick = 0;
 std::string portalStoneName;
@@ -92,8 +93,8 @@ class CPortalSetterWindow : public CCustomWnd {
 };
 
 int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown) {
-	if (pWnd==0) {
-		if (Message==XWM_CLOSE) {
+	if (pWnd == nullptr) {
+		if (Message == XWM_CLOSE) {
 			SetVisible(true);
 			return 1;
 		}
@@ -195,62 +196,55 @@ void DestroyPortalSetterWindow() {
 	pCPortalSetterWindow = nullptr;
 };
 
-static char* getPortalVendorName() {
-	if (GetCharInfo()->zoneId == 345)
+// char* for Target to work
+char* getPortalVendorName() {
+	if (pLocalPC->zoneId == ZONEID_GUILD_HALL)
 		return "Zeflmin Werlikanin";
 	return "Teleportation Assistant";
 }
 
-static double getPortalMerchantDistance() {
-	char zPortalMerchantDistance[MAX_STRING];
-	sprintf_s(zPortalMerchantDistance, "${Spawn[%s].Distance}", getPortalVendorName());
-	ParseMacroData(zPortalMerchantDistance,MAX_STRING);
-	return atof(zPortalMerchantDistance);
-}
-
-static bool isMerchantPortalSetter() {
-	char zMerchantName[MAX_STRING];
-	sprintf_s(zMerchantName, "${Merchant.CleanName}");
-	ParseMacroData(zMerchantName, MAX_STRING);
-	if (strstr(zMerchantName, getPortalVendorName())) {
-		return true;
+bool isMerchantPortalSetter() {
+	if (pActiveMerchant)
+	{
+		char zMerchantName[EQ_MAX_NAME];
+		strcpy_s(zMerchantName, pActiveMerchant->Name);
+		CleanupName(zMerchantName, sizeof(zMerchantName), false, false);
+		if (strstr(zMerchantName, getPortalVendorName())) {
+			return true;
+		}
 	}
 	return false;
 }
 
-
-static bool inPortalMerchantRange() {
-	if (getPortalMerchantDistance() < 20.0f)
-		return true;
-	return false;
-}
-
-static bool inGuildHall() {
-	if(strstr(((PZONEINFO)pZoneInfo)->LongName, "Guild Hall") != NULL)
-		return true;
-	return false;
+bool inPortalMerchantRange() {
+	MQSpawnSearch ssSpawn;
+	ClearSearchSpawn(&ssSpawn);
+	ssSpawn.FRadius = 20;
+	ssSpawn.SpawnType = NPC;
+	strcpy_s(ssSpawn.szName, getPortalVendorName());
+	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
 }
 
 void setPortal(std::string setPortalStoneName) {
-	if (currentRoutineStep == 1) {
-		if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
-			WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
-			currentRoutineStep = 0;
-		}
-		char zFreeInventory[MAX_STRING] = "${Me.FreeInventory}";
-		ParseMacroData(zFreeInventory,MAX_STRING);
-		if(atoi(zFreeInventory) == 0) {
-			WriteChatColor("[MQ2PortalSetter] You must have a free inventory slot to use portal setter.", CONCOLOR_YELLOW);
-			currentRoutineStep = 0;
-		}
-	}
 	switch (currentRoutineStep) {
 		case 1: {
-			char zStoneListPosition[MAX_STRING];
-			sprintf_s(zStoneListPosition, "${Window[MerchantWnd].Child[MW_ItemList].List[=%s,2]}", &setPortalStoneName[0]);
-			ParseMacroData(zStoneListPosition, MAX_STRING);
-			SendListSelect("MerchantWnd", "MW_ItemList", (atoi(zStoneListPosition) - 1));
-			currentRoutineStep++;
+			if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
+				WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
+				currentRoutineStep = 0;
+			} else if (GetFreeInventory(0) < 1) {
+				WriteChatColor("[MQ2PortalSetter] You must have a free inventory slot to use portal setter.", CONCOLOR_YELLOW);
+				currentRoutineStep = 0;
+			} else if (FindInventoryItemCountByName(setPortalStoneName.c_str()) > 0) {
+				WriteChatf("[MQ2PortalSetter] Using existing %s", setPortalStoneName.c_str());
+				currentRoutineStep = 3;
+			} else {
+				// FIXME:  No need for TLO call here
+				char zStoneListPosition[MAX_STRING];
+				sprintf_s(zStoneListPosition, "${Window[MerchantWnd].Child[MW_ItemList].List[=%s,2]}", &setPortalStoneName[0]);
+				ParseMacroData(zStoneListPosition, MAX_STRING);
+				SendListSelect("MerchantWnd", "MW_ItemList", (atoi(zStoneListPosition) - 1));
+				currentRoutineStep++;
+			}
 			break;
 		}
 		case 2: {
@@ -259,10 +253,9 @@ void setPortal(std::string setPortalStoneName) {
 			break;
 		}
 		case 3: {
-			CONTENTS* stone = FindItemByName(&setPortalStoneName[0], true);
-			if(stone) {
+			if(FindItemByName(&setPortalStoneName[0], true)) {
 				char zNotifyCommand[MAX_STRING];
-				pCPortalSetterWindow->SetVisible(0);
+				pCPortalSetterWindow->SetVisible(false);
 				SendWndClick("MerchantWnd", "MW_DONE_BUTTON", "leftmouseup");
 				sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", &setPortalStoneName[0]);
 				EzCommand(zNotifyCommand);
@@ -304,6 +297,8 @@ void setPortal(std::string setPortalStoneName) {
 			}
 			break;
 		}
+		default:
+			currentRoutineStep = 0;
 	}
 }
 
@@ -322,62 +317,38 @@ PLUGIN_API void ShutdownPlugin()
 
 PLUGIN_API void OnCleanUI()
 {
-	DebugSpewAlways("MQ2PortalSetter::OnCleanUI()");
 	DestroyPortalSetterWindow();
 }
 
 PLUGIN_API void OnReloadUI()
 {
-	DebugSpewAlways("MQ2PortalSetter::OnReloadUI()");
 	CreatePortalSetterWindow();
 }
 
-PLUGIN_API void SetGameState(int GameState)
+PLUGIN_API void OnPulse()
 {
-	DebugSpewAlways("MQ2PortalSetter::SetGameState()");
-	if (GameState == GAMESTATE_INGAME) {
-		if(inGuildHall()) {
-			if (!pluginEnabled) {
-				pluginEnabled = true;
-			}
-		} else {
-			if (pluginEnabled) {
-				pluginEnabled = false;
-			}
-		}
-	} else {
-		if (pluginEnabled) {
-			pluginEnabled = false;
-		}
-	}
-}
+	                                                        // Catch all types of Guild Halls
+	if (GetGameState() != GAMESTATE_INGAME || !pZoneInfo || strstr(pZoneInfo->LongName, "Guild Hall") == nullptr)
+		return;
 
-PLUGIN_API VOID OnPulse(VOID)
-{
-	//DebugSpewAlways("MQ2PortalSetter::OnPulse()");
-	if (!pluginEnabled) return;
-	DWORD currentTick = GetTickCount();
-	if (currentTick < nextCommandAtTick) return;
-	if (!pCPortalSetterWindow) return;
+	static std::chrono::steady_clock::time_point PulseTimer = std::chrono::steady_clock::now();
+	// Run only after timer is up
+	if (std::chrono::steady_clock::now() > PulseTimer)
+	{
+		if (!pCPortalSetterWindow)
+			CreatePortalSetterWindow();
 
-	//-- Check to see if we need to hide / show the portal window
-	if (pMerchantWnd->IsVisible() == true) {
-		if (currentRoutineStep < 4) {
-			if(pCPortalSetterWindow->IsVisible() == false && inPortalMerchantRange() && isMerchantPortalSetter()) {
-				pCPortalSetterWindow->SetVisible(true);
-			}
-		}
-	} else {
-		if(pCPortalSetterWindow->IsVisible() == true) {
-			pCPortalSetterWindow->SetVisible(false);
-		}
-	}
+		pCPortalSetterWindow->SetVisible(pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && isMerchantPortalSetter());
 
-	//-- If we are out of range then reset state.
-	if (currentRoutineStep && !inPortalMerchantRange()) {
-		WriteChatColor("[MQ2PortalSetter] Out of range of portal attendant, aborting.", CONCOLOR_RED);
-		currentRoutineStep = 0;
+		//-- If we are out of range then reset state.
+		if (currentRoutineStep > 0 && !inPortalMerchantRange()) {
+			WriteChatColor("[MQ2PortalSetter] Out of range of portal attendant, aborting.", CONCOLOR_RED);
+			currentRoutineStep = 0;
+		}
+
+		setPortal(portalStoneName);
+
+		// Wait 1 second before running again
+		PulseTimer = std::chrono::steady_clock::now() + std::chrono::seconds(1);
 	}
-	setPortal(portalStoneName);
-	nextCommandAtTick = currentTick + 60;
 }
