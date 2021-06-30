@@ -20,6 +20,9 @@
     <Xml Include="MQUI_PortalSetterWindow.xml">
       <Filter>Resource Files</Filter>
     </Xml>
+    <Xml Include="resources\uifiles\default\MQUI_PortalSetterWindow.xml">
+      <Filter>Source Files</Filter>
+    </Xml>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
