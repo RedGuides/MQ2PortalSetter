@@ -53,7 +53,7 @@ struct zonePortalInfo {
 
 // TODO:: add indicator for each xpac they come available for usage to only display if that xpac is unlocked
 // { "shortname", std::make_tuple("Zone Long Name", "Button Display", "Portal Stone Item Name") }
-std::vector<zonePortalInfo> s_zoneinfo = {
+const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
 	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
 	{ "eastwastetwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
@@ -93,37 +93,36 @@ void DrawPortalSetterPanel()
 	const ImVec2 halfsize = ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f);
 	const ImVec2 fullsize = ImVec2(ImGui::GetWindowSize().x * 1.0f, 0.0f);
 	const bool bEven = s_zoneinfo.size() % 2 == 0;
-	static char input[64] = {};
-	static char matchinput[64] = {};
-	static std::vector<zonePortalInfo>::iterator save;
 
 	if (bDisplaySearch) {
-		ImGui::Text("Type in short or long zone name.");
-		// we want to keep knowledge if we found a match so it doesn't clear out if we change the input, until we get another match
-		static bool bMatch = false;
+		static char input[64] = {};
+		static char matchinput[64] = {};
+		static std::string savebutton = {};
+		static std::string savestone = {};
 
+		ImGui::Text("Type in short or long zone name.");
 		if (bool NameInput = ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input)))
 		{
 			if (!ci_equals(matchinput, input))
 				strcpy_s(matchinput, input);
 		}
-
 		ImGui::SameLine();
 		mq::imgui::HelpMarker("You can type in the zone's longname or shortname, and it will display the button to select for that zone.");
 
 		for (auto it = s_zoneinfo.begin(); it != s_zoneinfo.end(); it++)
 		{
-			if (ci_equals(matchinput, it->shortname) || ci_equals(matchinput, it->longname)) {
-				save = it;
-				bMatch = true;
+			if (ci_equals(matchinput, it->shortname) || ci_equals(matchinput, it->longname))
+			{
+				savebutton = it->buttonname;
+				savestone = it->stonename;
 				break;
 			}
 		}
 
-		if (bMatch) {
-			if (ImGui::Button(save->buttonname, fullsize))
+		if (!savebutton.empty() && !savestone.empty()) {
+			if (ImGui::Button(savebutton.c_str(), fullsize))
 			{
-				SetStoneAndStep(save->stonename);
+				SetStoneAndStep(savestone);
 			}
 		}
 	}
@@ -138,7 +137,8 @@ void DrawPortalSetterPanel()
 	ImGui::Separator();
 
 	bool bModern = true;
-	if (bGroupZonesByEra) {
+	if (bGroupZonesByEra)
+	{
 		bModern = ImGui::CollapsingHeader("Modern");
 	}
 
