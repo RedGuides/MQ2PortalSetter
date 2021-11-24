@@ -16,14 +16,13 @@ constexpr int ZONEID_GUILD_HALL = 345;
 int currentRoutineStep = 0;
 
 static bool bShowWindow = false;
-static bool bFocusWindow = false;
 
 bool bDisplaySearch = true;
 bool bGroupZonesByEra = false;
 
 std::string portalStoneName;
 
-void setPortal(std::string setPortalStoneName);
+void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
 bool isMerchantPortalSetter();
 
@@ -138,12 +137,12 @@ void DrawPortalSetterPanel()
 	}
 	ImGui::Separator();
 
-	static bool bModern = false;
+	bool bModern = true;
 	if (bGroupZonesByEra) {
 		bModern = ImGui::CollapsingHeader("Modern");
 	}
 
-	if (!bGroupZonesByEra || bModern)
+	if (bModern)
 	{
 		// if vZoneInfo.size() is even, we want to to display 4 elements, otherwise 5
 		// this ensures we don't have an odd number of halfsized buttons.
@@ -159,13 +158,13 @@ void DrawPortalSetterPanel()
 	}
 	ImGui::Separator();
 
-	static bool bOlder = false;
+	static bool bOlder = true;
 
 	if (bGroupZonesByEra) {
 		bOlder = ImGui::CollapsingHeader("Older");
 	}
 
-	if (!bGroupZonesByEra || bOlder)
+	if (bOlder)
 	{
 		for (unsigned int i = (bEven ? 4 : 5); i < s_zoneinfo.size(); i++)
 		{
@@ -213,12 +212,6 @@ void ImGui_OnUpdate()
 
 	ImGui::SetNextWindowSize(ImVec2(400, 440), ImGuiCond_FirstUseEver);
 
-	if (bFocusWindow)
-	{
-		bFocusWindow = false;
-		ImGui::SetNextWindowFocus();
-	}
-
 	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_MenuBar))
 	{
 
@@ -227,21 +220,17 @@ void ImGui_OnUpdate()
 
 			if (ImGui::BeginTabItem("Portal Setter"))
 			{
-				if (ImGui::BeginChild("##Portal Setter"))
-				{
-					DrawPortalSetterPanel();
-				}
-				ImGui::EndChild();
+
+				DrawPortalSetterPanel();
+
 				ImGui::EndTabItem();
 			}
 
 			if (ImGui::BeginTabItem("Settings"))
 			{
-				if (ImGui::BeginChild("##Settings"))
-				{
-					DrawSettingsPanel();
-				}
-				ImGui::EndChild();
+
+				DrawSettingsPanel();
+
 				ImGui::EndTabItem();
 			}
 
@@ -281,7 +270,7 @@ bool inPortalMerchantRange() {
 	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
 }
 
-void setPortal(std::string& setPortalStoneName) {
+void setPortal(const std::string& setPortalStoneName) {
 	switch (currentRoutineStep) {
 		case 1: {
 			if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
@@ -404,7 +393,7 @@ PLUGIN_API void OnPulse()
 			currentRoutineStep = 0;
 		}
 
-		setPortal(portalStoneName);
+		setPortal(portalStoneName.c_str());
 
 		// Wait 1 second before running again
 		PulseTimer = std::chrono::steady_clock::now() + std::chrono::seconds(1);
