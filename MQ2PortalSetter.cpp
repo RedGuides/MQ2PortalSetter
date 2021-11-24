@@ -138,7 +138,7 @@ void DrawPortalSetterPanel()
 	}
 	ImGui::Separator();
 
-	static bool bModern = true;
+	bool bModern = true;
 	if (bGroupZonesByEra)
 	{
 		bModern = ImGui::CollapsingHeader("Modern");
@@ -160,7 +160,7 @@ void DrawPortalSetterPanel()
 	}
 	ImGui::Separator();
 
-	static bool bOlder = true;
+	bool bOlder = true;
 	if (bGroupZonesByEra)
 	{
 		bOlder = ImGui::CollapsingHeader("Older");
