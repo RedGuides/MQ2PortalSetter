@@ -3,198 +3,237 @@
 // Version: October 31, 2014 6:45 PM
 // Updated for Burning Lands - Dewey 12-11-2018
 
-// FIXME:  All the ParseMacroData calls are unnecessary.
 
 #include <mq/Plugin.h>
+#include <imgui.h>
+#include <mq/imgui/ImGuiUtils.h>
 
 PreSetup("MQ2PortalSetter");
-PLUGIN_VERSION(2021.0504);
+PLUGIN_VERSION(2021.1123);
 
 constexpr int ZONEID_GUILD_HALL = 345;
 
 int currentRoutineStep = 0;
-unsigned long nextCommandAtTick = 0;
+
+static bool s_showWindow = false;
+static bool s_focusWindow = false;
+
+bool bDisplaySearch = true;
+bool bGroupZonesByEra = false;
+
 std::string portalStoneName;
 
 void setPortal(std::string setPortalStoneName);
+void ImGui_OnUpdate();
+bool isMerchantPortalSetter();
 
-class CPortalSetterWindow : public CCustomWnd {
-  public:
-	CPortalSetterWindow(char *Template):CCustomWnd(Template) {
-		CobaltScarTwo_Button      = (CButtonWnd*)GetChildItem("CobaltScarTwoButton");
-		EasternWasteTwo_Button    = (CButtonWnd*)GetChildItem("EasternWastesTwoButton");
-		Stratos_button            = (CButtonWnd*)GetChildItem("StratosButton");
-		Overthere_button          = (CButtonWnd*)GetChildItem("OverthereButton");
-		Lceanium_button           = (CButtonWnd*)GetChildItem("LceaniumButton");
-		kattaCastrumDeluge_button = (CButtonWnd*)GetChildItem("KattaCastrumDelugeButton");
-		westKarana_button         = (CButtonWnd*)GetChildItem("WestKaranaButton");
-		shardsLanding_button      = (CButtonWnd*)GetChildItem("ShardsLandingButton");
-		argath_button             = (CButtonWnd*)GetChildItem("ArgathButton");
-		guildBanner_button        = (CButtonWnd*)GetChildItem("GuildBannerButton");
-		feerrott_button           = (CButtonWnd*)GetChildItem("FeerrottButton");
-		brellsRest_button         = (CButtonWnd*)GetChildItem("BrellsRestButton");
-		dragonscaleHills_button   = (CButtonWnd*)GetChildItem("DragonscaleHillsButton");
-		planeOfTime_button        = (CButtonWnd*)GetChildItem("PlaneOfTimeButton");
-		kattaCastrum_button       = (CButtonWnd*)GetChildItem("KattaCastrumButton");
-		gorukarMesa_button        = (CButtonWnd*)GetChildItem("GorukarMesaButton");
-		arcstone_button           = (CButtonWnd*)GetChildItem("ArcstoneButton");
-		planeOfSky_button         = (CButtonWnd*)GetChildItem("PlaneOfSkyButton");
-		cobaltScar_button         = (CButtonWnd*)GetChildItem("CobaltScarButton");
-		planeOfHate_button        = (CButtonWnd*)GetChildItem("PlaneOfHateButton");
-		barindu_button            = (CButtonWnd*)GetChildItem("BarinduButton");
-		wallOfSlaughter_button    = (CButtonWnd*)GetChildItem("WallOfSlaughterButton");
-		twilightSea_button        = (CButtonWnd*)GetChildItem("TwilightSeaButton");
-		undershore_button         = (CButtonWnd*)GetChildItem("UndershoreButton");
-		dreadlands_button         = (CButtonWnd*)GetChildItem("DreadlandsButton");
-		stonebrunt_button         = (CButtonWnd*)GetChildItem("StonebruntButton");
-		icecladOcean_button       = (CButtonWnd*)GetChildItem("IcecladOceanButton");
-		lavastorm_button          = (CButtonWnd*)GetChildItem("LavastormButton");
-		toxxulia_button           = (CButtonWnd*)GetChildItem("ToxxuliaButton");
-		northKarana_button        = (CButtonWnd*)GetChildItem("NorthKaranaButton");
-		commonlands_button        = (CButtonWnd*)GetChildItem("CommonlandsButton");
-		greaterFaydark_button     = (CButtonWnd*)GetChildItem("GreaterFaydarkButton");
-	}
-
-	~CPortalSetterWindow() {}
-
-	int WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown);
-	CButtonWnd* CobaltScarTwo_Button;
-	CButtonWnd* EasternWasteTwo_Button;
-	CButtonWnd* Stratos_button;
-	CButtonWnd* Overthere_button;
-	CButtonWnd* Lceanium_button;
-	CButtonWnd* kattaCastrumDeluge_button;
-	CButtonWnd* westKarana_button;
-	CButtonWnd* shardsLanding_button;
-	CButtonWnd* argath_button;
-	CButtonWnd* guildBanner_button;
-	CButtonWnd* feerrott_button;
-	CButtonWnd* brellsRest_button;
-	CButtonWnd* dragonscaleHills_button;
-	CButtonWnd* planeOfTime_button;
-	CButtonWnd* kattaCastrum_button;
-	CButtonWnd* gorukarMesa_button;
-	CButtonWnd* arcstone_button;
-	CButtonWnd* planeOfSky_button;
-	CButtonWnd* cobaltScar_button;
-	CButtonWnd* planeOfHate_button;
-	CButtonWnd* barindu_button;
-	CButtonWnd* wallOfSlaughter_button;
-	CButtonWnd* twilightSea_button;
-	CButtonWnd* undershore_button;
-	CButtonWnd* dreadlands_button;
-	CButtonWnd* stonebrunt_button;
-	CButtonWnd* icecladOcean_button;
-	CButtonWnd* lavastorm_button;
-	CButtonWnd* toxxulia_button;
-	CButtonWnd* northKarana_button;
-	CButtonWnd* commonlands_button;
-	CButtonWnd* greaterFaydark_button;
-};
-
-int CPortalSetterWindow::WndNotification(CXWnd *pWnd, unsigned int Message, void *unknown) {
-	if (pWnd == nullptr) {
-		if (Message == XWM_CLOSE) {
-			SetVisible(true);
-			return 1;
+PLUGIN_API void OnUpdateImGui()
+{
+	if (GetGameState() == GAMESTATE_INGAME)
+	{
+		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && isMerchantPortalSetter())
+		{
+			s_showWindow = true;
+			ImGui_OnUpdate();
 		}
 	}
-
-	if (Message == XWM_LCLICK) {
-		currentRoutineStep = 1;
-		if (pWnd == (CXWnd*)CobaltScarTwo_Button) {
-			portalStoneName = "Othmir Clamshell";
-		} else if (pWnd == (CXWnd*)EasternWasteTwo_Button) {
-			portalStoneName = "Brilliant Frigid Gemstone";
-		} else if (pWnd == (CXWnd*)Stratos_button) {
-			portalStoneName = "Burning Lamp";
-		} else if (pWnd == (CXWnd*)Overthere_button) {
-			portalStoneName = "Miniature Worker's Sledge Mallet";
-		} else if (pWnd == (CXWnd*)Lceanium_button) {
-			portalStoneName = "Fragment of the Combine Spire";
-		} else if (pWnd==(CXWnd*)kattaCastrumDeluge_button) {
-			portalStoneName = "Drowned Katta Castrum Powerstone";
-		} else if (pWnd==(CXWnd*)westKarana_button) {
-			portalStoneName = "Stormstone of the West";
-		} else if(pWnd==(CXWnd*)shardsLanding_button) {
-			portalStoneName = "Stone of the Shard's Fall";
-		} else if(pWnd==(CXWnd*)argath_button) {
-			portalStoneName = "Chunk of Argathian Steel";
-		} else if(pWnd==(CXWnd*)guildBanner_button) {
-			portalStoneName = "Splinter from a Guild Standard";
-		} else if(pWnd==(CXWnd*)feerrott_button) {
-			portalStoneName = "Crystallized Dream of the Feerrott";
-		} else if(pWnd==(CXWnd*)brellsRest_button) {
-			portalStoneName = "Unrefined Brellium Ore";
-		} else if(pWnd==(CXWnd*)dragonscaleHills_button) {
-			portalStoneName = "Dragonscale Faycite";
-		} else if(pWnd==(CXWnd*)planeOfTime_button) {
-			portalStoneName = "Broken Timestone";
-		} else if(pWnd==(CXWnd*)kattaCastrum_button) {
-			portalStoneName = "Katta Castrum Powerstone";
-		} else if(pWnd==(CXWnd*)gorukarMesa_button) {
-			portalStoneName = "Goru'kar Mesa Sandstone";
-		} else if(pWnd==(CXWnd*)arcstone_button) {
-			portalStoneName = "Arcstone Spirit Sapphire";
-		} else if(pWnd==(CXWnd*)planeOfSky_button) {
-			portalStoneName = "Cloudy Stone of Veeshan";
-		} else if(pWnd==(CXWnd*)cobaltScar_button) {
-			portalStoneName = "Velium Shard of Cobalt Scar";
-		} else if(pWnd==(CXWnd*)planeOfHate_button) {
-			portalStoneName = "Fuligan Soulstone of Innoruuk";
-		} else if(pWnd==(CXWnd*)barindu_button) {
-			portalStoneName = "Etched Marble of Barindu";
-		} else if(pWnd==(CXWnd*)wallOfSlaughter_button) {
-			portalStoneName = "Chipped Shard of Slaughter";
-		} else if(pWnd==(CXWnd*)twilightSea_button) {
-			portalStoneName = "Shadowed Sand of the Twilight Sea";
-		} else if(pWnd==(CXWnd*)undershore_button) {
-			portalStoneName = "Undershore Coral";
-		} else if(pWnd==(CXWnd*)dreadlands_button) {
-			portalStoneName = "Shattered Bone of the Dreadlands";
-		} else if(pWnd==(CXWnd*)stonebrunt_button) {
-			portalStoneName = "Moss Agate of Stonebrunt";
-		} else if(pWnd==(CXWnd*)icecladOcean_button) {
-			portalStoneName = "Frozen Shard of Iceclad";
-		} else if(pWnd==(CXWnd*)lavastorm_button) {
-			portalStoneName = "Lavastorm Magma";
-		} else if(pWnd==(CXWnd*)toxxulia_button) {
-			portalStoneName = "Opal of Toxxulia";
-		} else if(pWnd==(CXWnd*)northKarana_button) {
-			portalStoneName = "Karana Plains Pebble";
-		} else if(pWnd==(CXWnd*)commonlands_button) {
-			portalStoneName = "Grassy Pebble Of The Commonlands";
-		} else if(pWnd==(CXWnd*)greaterFaydark_button) {
-			portalStoneName = "Forest Emerald of Faydark";
-		} else {
-			currentRoutineStep = 0;
-		}
-
-		if (currentRoutineStep == 1) {
-			setPortal(portalStoneName);
-		}
-	}
-	return CSidlScreenWnd::WndNotification(pWnd,Message,unknown);
 }
 
-CPortalSetterWindow *pCPortalSetterWindow = nullptr;
+void SetStoneAndStep(std::string string, int step = 1)
+{
+	portalStoneName = string;
+	currentRoutineStep = step;
+}
 
-void CreatePortalSetterWindow() {
-	if (pCPortalSetterWindow)
-		return;
-
-	pCPortalSetterWindow = new CPortalSetterWindow("PortalSetterWindow");
-	pCPortalSetterWindow->SetVisible(false);
-	pCPortalSetterWindow->SetZLayer(9999);
+// order matters here, so map vs unordered.
+// TODO:: add indicator for each xpac they come available for usage to only display if that xpac is unlocked
+// { "shortname", std::make_tuple("Zone Long Name", "Button Display", "Portal Stone Item Name") }
+std::map<const char* , const std::tuple<const char* , const char*, const char*>> mZoneInfo = {
+	{ "maidentwo", std::make_tuple("Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest") },
+	{ "cobaltscartwo", std::make_tuple("Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell") },
+	{ "eastwastetwo", std::make_tuple("The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone") },
+	{ "stratos", std::make_tuple("Stratos: Zephyr's Flight", "Stratos", "Burning Lamp") },
+	{ "overtheretwo", std::make_tuple("The Overthere", "Overthere", "Miniature Worker's Sledge Mallet") },
+	{ "lcaenium", std::make_tuple("Lcaenium", "Lcaenium", "Fragment of the Combine Spire") },
+	{ "kattacastrumb", std::make_tuple("Katta Castrum, The Deluge", "Katta", "Drowned Katta Castrum Powerstone") },
+	{ "ethernere", std::make_tuple("Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West") },
+	{ "shardslanding", std::make_tuple("Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall") },
+	{ "Argath", std::make_tuple("Argath", "Argath", "Chunk of Argathian Steel") },
+	{ "feerrott2", std::make_tuple("The Feerrott: The Dream", "Feerrott: The Dream", "Crystallized Dream of the Feerott") },
+	{ "brellsrest", std::make_tuple("Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore") },
+	{ "dragonscale", std::make_tuple("Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite") },
+	{ "potime", std::make_tuple("The Plane of Time", "Plane of Time", "Broken Timestone") },
+	{ "kattacastrum", std::make_tuple("Katta Castrum", "Katta", "Katta Castrum Powerstone") },
+	{ "mesa", std::make_tuple("Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone") }, // ' and not ` for the "Goru'kar mesa sandstone"
+	{ "arcstone", std::make_tuple("Arcstone", "Arcstone", "Arcstone Spirit Sapphire") },
+	{ "posky", std::make_tuple("The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan") },
+	{ "cobaltscar", std::make_tuple("Cobalt Scar", "Cobalt Scar", "Velium Shard of Cobalt Scar") },
+	{ "pohate", std::make_tuple("The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk") },
+	{ "barindu", std::make_tuple("Barindu, Hanging Gardens", "Barindu", "Etched Marble of Barindu") },
+	{ "wallofslaughter", std::make_tuple("Wall of Slaughter", "Wall of Slaughter", "Chipped Shard of Slaughter") },
+	{ "twilight", std::make_tuple("The Twilight Sea", "Twilight Sea", "Shadowed Sand of the Twilight Sea") },
+	{ "eastkorlach", std::make_tuple("Undershore", "Undershore", "Undershore Coral") },
+	{ "dreadlands", std::make_tuple("Dreadlands", "Dreadlands", "Shattered Bone of the Dreadlands") },
+	{ "stonebrunt", std::make_tuple("Stonebrunt Mountains", "Stonebrunt", "Moss Agate of Stonebrunt") },
+	{ "iceclad", std::make_tuple("Iceclad Ocean", "Iceclad Ocean", "Frozen Shard of Iceclad") },
+	{ "lavastorm", std::make_tuple("Lavastorm", "Lavastorm", "Lavastorm Magma") },
+	{ "tox",  std::make_tuple("Toxxulia","Toxxulia", "Opal of Toxxulia") },
+	{ "northkarana", std::make_tuple("North Karana", "North Karana", "Karana Plains Pebble") },
+	{ "commonlands", std::make_tuple("Commonlands", "Commonlands", "Grassy Pebble of the Commonalnds") },
+	{ "gfaydark", std::make_tuple("The Greater Faydark", "Greater Faydark", "Forest Emerald of Faydark") },
 };
 
-void DestroyPortalSetterWindow() {
-	if (!pCPortalSetterWindow)
+void DrawPortalSetterPanel()
+{
+	const ImVec2 halfsize = ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f);
+	const ImVec2 fullsize = ImVec2(ImGui::GetWindowSize().x * 1.0f, 0.0f);
+	const bool bEven = mZoneInfo.size() % 2 == 0;
+	char input[64] = {};
+	static char spellName[64] = { 0 };
+
+	if (bDisplaySearch) {
+		ImGui::Text("Type in short or long zone name.");
+		bool shortNameInput = ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input));
+		ImGui::SameLine();
+		mq::imgui::HelpMarker("You can type in the zone's longname or shortname, and it will display the button to select for that zone.");
+
+		for (auto it = mZoneInfo.begin(); it != mZoneInfo.end(); it++)
+		{
+			static int iMatch = -1; // iMatch is static so we continue to display while clicking or typing
+			if (ci_equals(input, it->first) || ci_equals(input, std::get<0>(it->second)))
+				iMatch = std::distance(mZoneInfo.begin(), it);
+
+			if (iMatch == std::distance(mZoneInfo.begin(), it))
+			{
+				if (ImGui::Button(std::get<1>(it->second), fullsize))
+				{
+					SetStoneAndStep(std::get<2>(it->second));
+				}
+			}
+		}
+	}
+
+	ImGui::Separator();
+	// TODO: Would like a way to get the information from the guild window "Banner" tab
+	// so we can display if and where the guild banner is already assigned to
+	if (ImGui::Button("Guild Banner", fullsize))
+	{
+		SetStoneAndStep("Splinter from a Guild Standard");
+	}
+	ImGui::Separator();
+
+	static bool bModern = false;
+	if (bGroupZonesByEra) {
+		bModern = ImGui::CollapsingHeader("Modern");
+	}
+
+	if (bGroupZonesByEra ? bModern : true)
+	{
+		// if vZoneInfo.size() is even, we want to to display 4 elements, otherwise 5
+		// this ensures we don't have an odd number of halfsized buttons.
+		for (int i = 0; i < (bEven ? 4 : 5); i++)
+		{
+			auto it = mZoneInfo.begin();
+			std::advance(it, i);
+			if (ImGui::Button(std::get<1>(it->second), fullsize))
+			{
+				SetStoneAndStep(std::get<2>(it->second));
+			}
+		}
+	}
+	ImGui::Separator();
+
+	static bool bOlder = false;
+
+	if (bGroupZonesByEra) {
+		bOlder = ImGui::CollapsingHeader("Older");
+	}
+
+	if (bGroupZonesByEra ? bOlder : true)
+	{
+		for (unsigned int i = (bEven ? 4 : 5); i < mZoneInfo.size(); i++)
+		{
+			auto it = mZoneInfo.begin();
+			std::advance(it, i);
+			if (i % 2)
+			{
+				ImGui::SameLine();
+				if (ImGui::Button(std::get<1>(it->second), halfsize))
+				{
+					SetStoneAndStep(std::get<2>(it->second));
+				}
+			}
+			else {
+				if (ImGui::Button(std::get<1>(it->second), halfsize))
+				{
+					SetStoneAndStep(std::get<2>(it->second));
+				}
+			}
+		}
+	}
+}
+
+void DrawSettingsPanel()
+{
+	if (ImGui::Checkbox("Display Zone Search", &bDisplaySearch))
+	{
+		WritePrivateProfileBool("Settings", "DisplaySearch", bDisplaySearch, INIFileName);
+	}
+	ImGui::SameLine();
+	mq::imgui::HelpMarker("Allows the zone shortname / longname search bar.\n\nINI Setting: DisplaySearch");
+
+	if (ImGui::Checkbox("Group Modern / Older Zones,", &bGroupZonesByEra))
+	{
+		WritePrivateProfileBool("Settings", "GroupZonesByEra", bGroupZonesByEra, INIFileName);
+	}
+	ImGui::SameLine();
+	mq::imgui::HelpMarker("Allows grouping of buttons in \"Modern\" and \"Older\" as a collapsible header.\n\nINI Setting: GroupZonesByEra");
+}
+
+void ImGui_OnUpdate()
+{
+	if (!s_showWindow)
 		return;
 
-	delete pCPortalSetterWindow;
-	pCPortalSetterWindow = nullptr;
-};
+	ImGui::SetNextWindowSize(ImVec2(400, 440), ImGuiCond_FirstUseEver);
+
+	if (s_focusWindow)
+	{
+		s_focusWindow = false;
+		ImGui::SetNextWindowFocus();
+	}
+
+	if (ImGui::Begin("Portal Setter", &s_showWindow, ImGuiWindowFlags_MenuBar))
+	{
+
+		if (ImGui::BeginTabBar("PortalSetterTab", ImGuiTabBarFlags_None))
+		{
+
+			if (ImGui::BeginTabItem("Portal Setter"))
+			{
+				if (ImGui::BeginChild("##Portal Setter"))
+				{
+					DrawPortalSetterPanel();
+				}
+				ImGui::EndChild();
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Settings"))
+			{
+				if (ImGui::BeginChild("##Settings"))
+				{
+					DrawSettingsPanel();
+				}
+				ImGui::EndChild();
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}
+	}
+	ImGui::End();
+}
 
 // char* for Target to work
 char* getPortalVendorName() {
@@ -209,7 +248,8 @@ bool isMerchantPortalSetter() {
 		char zMerchantName[EQ_MAX_NAME];
 		strcpy_s(zMerchantName, pActiveMerchant->Name);
 		CleanupName(zMerchantName, sizeof(zMerchantName), false, false);
-		if (strstr(zMerchantName, getPortalVendorName())) {
+		if (strstr(zMerchantName, getPortalVendorName()))
+		{
 			return true;
 		}
 	}
@@ -238,12 +278,22 @@ void setPortal(std::string setPortalStoneName) {
 				WriteChatf("[MQ2PortalSetter] Using existing %s", setPortalStoneName.c_str());
 				currentRoutineStep = 3;
 			} else {
-				// FIXME:  No need for TLO call here
-				char zStoneListPosition[MAX_STRING];
-				sprintf_s(zStoneListPosition, "${Window[MerchantWnd].Child[MW_ItemList].List[=%s,2]}", &setPortalStoneName[0]);
-				ParseMacroData(zStoneListPosition, MAX_STRING);
-				SendListSelect("MerchantWnd", "MW_ItemList", (atoi(zStoneListPosition) - 1));
-				currentRoutineStep++;
+				if (CXWnd* merchantwnd = FindMQ2Window("MerchantWnd"))
+				{
+					if (CListWnd* cLWnd = (CListWnd*)merchantwnd->GetChildItem("MW_ItemList"))
+					{
+						for (int i = 0; i < cLWnd->ItemsArray.GetLength(); ++i)
+						{
+							CXStr itemName = cLWnd->GetItemText(i, 1);
+							if (string_equals(setPortalStoneName, itemName))
+							{
+								SendListSelect("MerchantWnd", "MW_ItemList", i);
+								currentRoutineStep++;
+								break;
+							}
+						}
+					}
+				}
 			}
 			break;
 		}
@@ -255,7 +305,6 @@ void setPortal(std::string setPortalStoneName) {
 		case 3: {
 			if(FindItemByName(&setPortalStoneName[0], true)) {
 				char zNotifyCommand[MAX_STRING];
-				pCPortalSetterWindow->SetVisible(false);
 				SendWndClick("MerchantWnd", "MW_DONE_BUTTON", "leftmouseup");
 				sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", &setPortalStoneName[0]);
 				EzCommand(zNotifyCommand);
@@ -278,6 +327,7 @@ void setPortal(std::string setPortalStoneName) {
 				currentRoutineStep--;
 			}
 			if (pGiveWnd->IsVisible() && currentRoutineStep == 5) {
+				s_showWindow = true;
 				currentRoutineStep++;
 			}
 			break;
@@ -302,27 +352,22 @@ void setPortal(std::string setPortalStoneName) {
 	}
 }
 
+void LoadPortalSetterSettings()
+{
+	bDisplaySearch = GetPrivateProfileBool("Settings", "DisplaySearch", bDisplaySearch, INIFileName);
+	bGroupZonesByEra = GetPrivateProfileBool("Settings", "GroupZonesByEra", bGroupZonesByEra, INIFileName);
+}
+
+
 PLUGIN_API void InitializePlugin()
 {
 	DebugSpewAlways("Initializing MQ2PortalSetter");
-	AddXMLFile("MQUI_PortalSetterWindow.xml");
+	LoadPortalSetterSettings();
 }
 
 PLUGIN_API void ShutdownPlugin()
 {
 	DebugSpewAlways("Shutting down MQ2PortalSetter");
-	DestroyPortalSetterWindow();
-	RemoveXMLFile("MQUI_PortalSetterWindow.xml");
-}
-
-PLUGIN_API void OnCleanUI()
-{
-	DestroyPortalSetterWindow();
-}
-
-PLUGIN_API void OnReloadUI()
-{
-	CreatePortalSetterWindow();
 }
 
 PLUGIN_API void OnPulse()
@@ -335,14 +380,11 @@ PLUGIN_API void OnPulse()
 	// Run only after timer is up
 	if (std::chrono::steady_clock::now() > PulseTimer)
 	{
-		if (!pCPortalSetterWindow)
-			CreatePortalSetterWindow();
-
-		pCPortalSetterWindow->SetVisible(pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && isMerchantPortalSetter());
-
 		//-- If we are out of range then reset state.
-		if (currentRoutineStep > 0 && !inPortalMerchantRange()) {
+		if (currentRoutineStep > 0 && !inPortalMerchantRange())
+		{
 			WriteChatColor("[MQ2PortalSetter] Out of range of portal attendant, aborting.", CONCOLOR_RED);
+			s_showWindow = false;
 			currentRoutineStep = 0;
 		}
 
