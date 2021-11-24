@@ -15,8 +15,8 @@ constexpr int ZONEID_GUILD_HALL = 345;
 
 int currentRoutineStep = 0;
 
-static bool s_showWindow = false;
-static bool s_focusWindow = false;
+static bool bShowWindow = false;
+static bool bFocusWindow = false;
 
 bool bDisplaySearch = true;
 bool bGroupZonesByEra = false;
@@ -33,15 +33,15 @@ PLUGIN_API void OnUpdateImGui()
 	{
 		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && isMerchantPortalSetter())
 		{
-			s_showWindow = true;
+			bShowWindow = true;
 			ImGui_OnUpdate();
 		}
 	}
 }
 
-void SetStoneAndStep(std::string string, int step = 1)
+void SetStoneAndStep(const std::string& stoneName, int step = 1)
 {
-	portalStoneName = string;
+	portalStoneName = stoneName;
 	currentRoutineStep = step;
 }
 
@@ -127,7 +127,7 @@ void DrawPortalSetterPanel()
 		bModern = ImGui::CollapsingHeader("Modern");
 	}
 
-	if (bGroupZonesByEra ? bModern : true)
+	if (!bGroupZonesByEra || bModern)
 	{
 		// if vZoneInfo.size() is even, we want to to display 4 elements, otherwise 5
 		// this ensures we don't have an odd number of halfsized buttons.
@@ -149,7 +149,7 @@ void DrawPortalSetterPanel()
 		bOlder = ImGui::CollapsingHeader("Older");
 	}
 
-	if (bGroupZonesByEra ? bOlder : true)
+	if (!bGroupZonesByEra || bOlder)
 	{
 		for (unsigned int i = (bEven ? 4 : 5); i < mZoneInfo.size(); i++)
 		{
@@ -192,18 +192,18 @@ void DrawSettingsPanel()
 
 void ImGui_OnUpdate()
 {
-	if (!s_showWindow)
+	if (!bShowWindow)
 		return;
 
 	ImGui::SetNextWindowSize(ImVec2(400, 440), ImGuiCond_FirstUseEver);
 
-	if (s_focusWindow)
+	if (bFocusWindow)
 	{
-		s_focusWindow = false;
+		bFocusWindow = false;
 		ImGui::SetNextWindowFocus();
 	}
 
-	if (ImGui::Begin("Portal Setter", &s_showWindow, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_MenuBar))
 	{
 
 		if (ImGui::BeginTabBar("PortalSetterTab", ImGuiTabBarFlags_None))
@@ -327,7 +327,7 @@ void setPortal(std::string setPortalStoneName) {
 				currentRoutineStep--;
 			}
 			if (pGiveWnd->IsVisible() && currentRoutineStep == 5) {
-				s_showWindow = true;
+				bShowWindow = true;
 				currentRoutineStep++;
 			}
 			break;
@@ -384,7 +384,7 @@ PLUGIN_API void OnPulse()
 		if (currentRoutineStep > 0 && !inPortalMerchantRange())
 		{
 			WriteChatColor("[MQ2PortalSetter] Out of range of portal attendant, aborting.", CONCOLOR_RED);
-			s_showWindow = false;
+			bShowWindow = false;
 			currentRoutineStep = 0;
 		}
 
