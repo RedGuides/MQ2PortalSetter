@@ -182,7 +182,7 @@ void DrawSettingsPanel()
 	ImGui::SameLine();
 	mq::imgui::HelpMarker("Allows the zone shortname / longname search bar.\n\nINI Setting: DisplaySearch");
 
-	if (ImGui::Checkbox("Group Modern / Older Zones,", &bGroupZonesByEra))
+	if (ImGui::Checkbox("Group Modern / Older Zones", &bGroupZonesByEra))
 	{
 		WritePrivateProfileBool("Settings", "GroupZonesByEra", bGroupZonesByEra, INIFileName);
 	}
