@@ -44,7 +44,8 @@ void SetStoneAndStep(const std::string& stoneName, int step = 1)
 	currentRoutineStep = step;
 }
 
-struct zonePortalInfo {
+struct zonePortalInfo
+{
 	const char* shortname;
 	const char* longname;
 	const char* buttonname;
@@ -52,7 +53,6 @@ struct zonePortalInfo {
 };
 
 // TODO:: add indicator for each xpac they come available for usage to only display if that xpac is unlocked
-// { "shortname", std::make_tuple("Zone Long Name", "Button Display", "Portal Stone Item Name") }
 const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
 	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
@@ -93,12 +93,13 @@ void DrawPortalSetterPanel()
 	const ImVec2 halfsize = ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f);
 	const ImVec2 fullsize = ImVec2(ImGui::GetWindowSize().x * 1.0f, 0.0f);
 	const bool bEven = s_zoneinfo.size() % 2 == 0;
+	const int NumberOfButtons = 4;
 
-	if (bDisplaySearch) {
+	if (bDisplaySearch)
+	{
 		static char input[64] = {};
 		static char matchinput[64] = {};
-		static std::string savebutton = {};
-		static std::string savestone = {};
+		static const zonePortalInfo* save = nullptr;
 
 		ImGui::Text("Type in short or long zone name.");
 		if (bool NameInput = ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input)))
@@ -109,20 +110,21 @@ void DrawPortalSetterPanel()
 		ImGui::SameLine();
 		mq::imgui::HelpMarker("You can type in the zone's longname or shortname, and it will display the button to select for that zone.");
 
-		for (auto it = s_zoneinfo.begin(); it != s_zoneinfo.end(); it++)
+
+		for (const zonePortalInfo& info : s_zoneinfo)
 		{
-			if (ci_equals(matchinput, it->shortname) || ci_equals(matchinput, it->longname))
+			if (ci_equals(matchinput, info.shortname) || ci_equals(matchinput, info.longname))
 			{
-				savebutton = it->buttonname;
-				savestone = it->stonename;
+				save = &info;
 				break;
 			}
 		}
 
-		if (!savebutton.empty() && !savestone.empty()) {
-			if (ImGui::Button(savebutton.c_str(), fullsize))
+		if (save)
+		{
+			if (ImGui::Button(save->buttonname, fullsize))
 			{
-				SetStoneAndStep(savestone);
+				SetStoneAndStep(save->stonename);
 			}
 		}
 	}
@@ -136,7 +138,7 @@ void DrawPortalSetterPanel()
 	}
 	ImGui::Separator();
 
-	bool bModern = true;
+	static bool bModern = true;
 	if (bGroupZonesByEra)
 	{
 		bModern = ImGui::CollapsingHeader("Modern");
@@ -144,9 +146,9 @@ void DrawPortalSetterPanel()
 
 	if (bModern)
 	{
-		// if vZoneInfo.size() is even, we want to to display 4 elements, otherwise 5
+		// if vZoneInfo.size() is even, we want to to display 4 fullsized buttons, otherwise 5
 		// this ensures we don't have an odd number of halfsized buttons.
-		for (int i = 0; i < (bEven ? 4 : 5); i++)
+		for (int i = 0; i < (bEven ? NumberOfButtons : NumberOfButtons + 1); i++)
 		{
 			auto it = s_zoneinfo.begin();
 			std::advance(it, i);
@@ -159,14 +161,14 @@ void DrawPortalSetterPanel()
 	ImGui::Separator();
 
 	static bool bOlder = true;
-
-	if (bGroupZonesByEra) {
+	if (bGroupZonesByEra)
+	{
 		bOlder = ImGui::CollapsingHeader("Older");
 	}
 
 	if (bOlder)
 	{
-		for (unsigned int i = (bEven ? 4 : 5); i < s_zoneinfo.size(); i++)
+		for (int i = 0; i < (bEven ? NumberOfButtons : NumberOfButtons + 1); i++)
 		{
 			auto it = s_zoneinfo.begin();
 			std::advance(it, i);
@@ -214,23 +216,17 @@ void ImGui_OnUpdate()
 
 	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_MenuBar))
 	{
-
 		if (ImGui::BeginTabBar("PortalSetterTab", ImGuiTabBarFlags_None))
 		{
-
 			if (ImGui::BeginTabItem("Portal Setter"))
 			{
-
 				DrawPortalSetterPanel();
-
 				ImGui::EndTabItem();
 			}
 
 			if (ImGui::BeginTabItem("Settings"))
 			{
-
 				DrawSettingsPanel();
-
 				ImGui::EndTabItem();
 			}
 
