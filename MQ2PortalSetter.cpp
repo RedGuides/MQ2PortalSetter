@@ -303,10 +303,10 @@ void setPortal(std::string setPortalStoneName) {
 			break;
 		}
 		case 3: {
-			if(FindItemByName(&setPortalStoneName[0], true)) {
+			if(FindItemByName(setPortalStoneName.c_str(), true)) {
 				char zNotifyCommand[MAX_STRING];
 				SendWndClick("MerchantWnd", "MW_DONE_BUTTON", "leftmouseup");
-				sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", &setPortalStoneName[0]);
+				sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", setPortalStoneName.c_str());
 				EzCommand(zNotifyCommand);
 				currentRoutineStep++;
 			}
