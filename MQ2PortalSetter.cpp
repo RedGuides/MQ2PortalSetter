@@ -45,70 +45,86 @@ void SetStoneAndStep(const std::string& stoneName, int step = 1)
 	currentRoutineStep = step;
 }
 
-// order matters here, so map vs unordered.
+struct zonePortalInfo {
+	const char* shortname;
+	const char* longname;
+	const char* buttonname;
+	const char* stonename;
+};
+
 // TODO:: add indicator for each xpac they come available for usage to only display if that xpac is unlocked
 // { "shortname", std::make_tuple("Zone Long Name", "Button Display", "Portal Stone Item Name") }
-std::map<const char* , const std::tuple<const char* , const char*, const char*>> mZoneInfo = {
-	{ "maidentwo", std::make_tuple("Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest") },
-	{ "cobaltscartwo", std::make_tuple("Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell") },
-	{ "eastwastetwo", std::make_tuple("The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone") },
-	{ "stratos", std::make_tuple("Stratos: Zephyr's Flight", "Stratos", "Burning Lamp") },
-	{ "overtheretwo", std::make_tuple("The Overthere", "Overthere", "Miniature Worker's Sledge Mallet") },
-	{ "lcaenium", std::make_tuple("Lcaenium", "Lcaenium", "Fragment of the Combine Spire") },
-	{ "kattacastrumb", std::make_tuple("Katta Castrum, The Deluge", "Katta", "Drowned Katta Castrum Powerstone") },
-	{ "ethernere", std::make_tuple("Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West") },
-	{ "shardslanding", std::make_tuple("Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall") },
-	{ "Argath", std::make_tuple("Argath", "Argath", "Chunk of Argathian Steel") },
-	{ "feerrott2", std::make_tuple("The Feerrott: The Dream", "Feerrott: The Dream", "Crystallized Dream of the Feerott") },
-	{ "brellsrest", std::make_tuple("Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore") },
-	{ "dragonscale", std::make_tuple("Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite") },
-	{ "potime", std::make_tuple("The Plane of Time", "Plane of Time", "Broken Timestone") },
-	{ "kattacastrum", std::make_tuple("Katta Castrum", "Katta", "Katta Castrum Powerstone") },
-	{ "mesa", std::make_tuple("Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone") }, // ' and not ` for the "Goru'kar mesa sandstone"
-	{ "arcstone", std::make_tuple("Arcstone", "Arcstone", "Arcstone Spirit Sapphire") },
-	{ "posky", std::make_tuple("The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan") },
-	{ "cobaltscar", std::make_tuple("Cobalt Scar", "Cobalt Scar", "Velium Shard of Cobalt Scar") },
-	{ "pohate", std::make_tuple("The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk") },
-	{ "barindu", std::make_tuple("Barindu, Hanging Gardens", "Barindu", "Etched Marble of Barindu") },
-	{ "wallofslaughter", std::make_tuple("Wall of Slaughter", "Wall of Slaughter", "Chipped Shard of Slaughter") },
-	{ "twilight", std::make_tuple("The Twilight Sea", "Twilight Sea", "Shadowed Sand of the Twilight Sea") },
-	{ "eastkorlach", std::make_tuple("Undershore", "Undershore", "Undershore Coral") },
-	{ "dreadlands", std::make_tuple("Dreadlands", "Dreadlands", "Shattered Bone of the Dreadlands") },
-	{ "stonebrunt", std::make_tuple("Stonebrunt Mountains", "Stonebrunt", "Moss Agate of Stonebrunt") },
-	{ "iceclad", std::make_tuple("Iceclad Ocean", "Iceclad Ocean", "Frozen Shard of Iceclad") },
-	{ "lavastorm", std::make_tuple("Lavastorm", "Lavastorm", "Lavastorm Magma") },
-	{ "tox",  std::make_tuple("Toxxulia","Toxxulia", "Opal of Toxxulia") },
-	{ "northkarana", std::make_tuple("North Karana", "North Karana", "Karana Plains Pebble") },
-	{ "commonlands", std::make_tuple("Commonlands", "Commonlands", "Grassy Pebble of the Commonalnds") },
-	{ "gfaydark", std::make_tuple("The Greater Faydark", "Greater Faydark", "Forest Emerald of Faydark") },
+std::vector<zonePortalInfo> s_zoneinfo = {
+	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
+	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
+	{ "eastwastetwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
+	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp" },
+	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet" },
+	{ "lcaenium", "Lcaenium", "Lcaenium", "Fragment of the Combine Spire" },
+	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta", "Drowned Katta Castrum Powerstone" },
+	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West" },
+	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall" },
+	{ "Argath", "Argath", "Argath", "Chunk of Argathian Steel" },
+	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerott" },
+	{ "brellsrest", "Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore" },
+	{ "dragonscale", "Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite" },
+	{ "potime", "The Plane of Time", "Plane of Time", "Broken Timestone" },
+	{ "kattacastrum", "Katta Castrum", "Katta", "Katta Castrum Powerstone" },
+	{ "mesa", "Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone" }, // ' and not ` for the "Goru'kar mesa sandstone"
+	{ "arcstone", "Arcstone", "Arcstone", "Arcstone Spirit Sapphire" },
+	{ "posky", "The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan" },
+	{ "cobaltscar", "Cobalt Scar", "Cobalt Scar", "Velium Shard of Cobalt Scar" },
+	{ "pohate", "The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk" },
+	{ "barindu", "Barindu, Hanging Gardens", "Barindu", "Etched Marble of Barindu" },
+	{ "wallofslaughter", "Wall of Slaughter", "Wall of Slaughter", "Chipped Shard of Slaughter" },
+	{ "twilight", "The Twilight Sea", "Twilight Sea", "Shadowed Sand of the Twilight Sea" },
+	{ "eastkorlach", "Undershore", "Undershore", "Undershore Coral" },
+	{ "dreadlands", "Dreadlands", "Dreadlands", "Shattered Bone of the Dreadlands" },
+	{ "stonebrunt", "Stonebrunt Mountains", "Stonebrunt", "Moss Agate of Stonebrunt" },
+	{ "iceclad", "Iceclad Ocean", "Iceclad Ocean", "Frozen Shard of Iceclad" },
+	{ "lavastorm", "Lavastorm", "Lavastorm", "Lavastorm Magma" },
+	{ "tox", "Toxxulia", "Toxxulia", "Opal of Toxxulia" },
+	{ "northkarana", "North Karana", "North Karana", "Karana Plains Pebble" },
+	{ "commonlands", "Commonlands", "Commonlands", "Grassy Pebble of the Commonalnds" },
+	{ "gfaydark", "The Greater Faydark", "Greater Faydark", "Forest Emerald of Faydark" },
 };
 
 void DrawPortalSetterPanel()
 {
 	const ImVec2 halfsize = ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f);
 	const ImVec2 fullsize = ImVec2(ImGui::GetWindowSize().x * 1.0f, 0.0f);
-	const bool bEven = mZoneInfo.size() % 2 == 0;
-	char input[64] = {};
-	static char spellName[64] = { 0 };
+	const bool bEven = s_zoneinfo.size() % 2 == 0;
+	static char input[64] = {};
+	static char matchinput[64] = {};
+	static std::vector<zonePortalInfo>::iterator save;
 
 	if (bDisplaySearch) {
 		ImGui::Text("Type in short or long zone name.");
-		bool shortNameInput = ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input));
+		// we want to keep knowledge if we found a match so it doesn't clear out if we change the input, until we get another match
+		static bool bMatch = false;
+
+		if (bool NameInput = ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input)))
+		{
+			if (!ci_equals(matchinput, input))
+				strcpy_s(matchinput, input);
+		}
+
 		ImGui::SameLine();
 		mq::imgui::HelpMarker("You can type in the zone's longname or shortname, and it will display the button to select for that zone.");
 
-		for (auto it = mZoneInfo.begin(); it != mZoneInfo.end(); it++)
+		for (auto it = s_zoneinfo.begin(); it != s_zoneinfo.end(); it++)
 		{
-			static int iMatch = -1; // iMatch is static so we continue to display while clicking or typing
-			if (ci_equals(input, it->first) || ci_equals(input, std::get<0>(it->second)))
-				iMatch = std::distance(mZoneInfo.begin(), it);
+			if (ci_equals(matchinput, it->shortname) || ci_equals(matchinput, it->longname)) {
+				save = it;
+				bMatch = true;
+				break;
+			}
+		}
 
-			if (iMatch == std::distance(mZoneInfo.begin(), it))
+		if (bMatch) {
+			if (ImGui::Button(save->buttonname, fullsize))
 			{
-				if (ImGui::Button(std::get<1>(it->second), fullsize))
-				{
-					SetStoneAndStep(std::get<2>(it->second));
-				}
+				SetStoneAndStep(save->stonename);
 			}
 		}
 	}
@@ -133,11 +149,11 @@ void DrawPortalSetterPanel()
 		// this ensures we don't have an odd number of halfsized buttons.
 		for (int i = 0; i < (bEven ? 4 : 5); i++)
 		{
-			auto it = mZoneInfo.begin();
+			auto it = s_zoneinfo.begin();
 			std::advance(it, i);
-			if (ImGui::Button(std::get<1>(it->second), fullsize))
+			if (ImGui::Button(it->buttonname, fullsize))
 			{
-				SetStoneAndStep(std::get<2>(it->second));
+				SetStoneAndStep(it->stonename);
 			}
 		}
 	}
@@ -151,22 +167,22 @@ void DrawPortalSetterPanel()
 
 	if (!bGroupZonesByEra || bOlder)
 	{
-		for (unsigned int i = (bEven ? 4 : 5); i < mZoneInfo.size(); i++)
+		for (unsigned int i = (bEven ? 4 : 5); i < s_zoneinfo.size(); i++)
 		{
-			auto it = mZoneInfo.begin();
+			auto it = s_zoneinfo.begin();
 			std::advance(it, i);
 			if (i % 2)
 			{
 				ImGui::SameLine();
-				if (ImGui::Button(std::get<1>(it->second), halfsize))
+				if (ImGui::Button(it->buttonname, halfsize))
 				{
-					SetStoneAndStep(std::get<2>(it->second));
+					SetStoneAndStep(it->stonename);
 				}
 			}
 			else {
-				if (ImGui::Button(std::get<1>(it->second), halfsize))
+				if (ImGui::Button(it->buttonname, halfsize))
 				{
-					SetStoneAndStep(std::get<2>(it->second));
+					SetStoneAndStep(it->stonename);
 				}
 			}
 		}
@@ -265,7 +281,7 @@ bool inPortalMerchantRange() {
 	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
 }
 
-void setPortal(std::string setPortalStoneName) {
+void setPortal(std::string& setPortalStoneName) {
 	switch (currentRoutineStep) {
 		case 1: {
 			if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
@@ -278,7 +294,7 @@ void setPortal(std::string setPortalStoneName) {
 				WriteChatf("[MQ2PortalSetter] Using existing %s", setPortalStoneName.c_str());
 				currentRoutineStep = 3;
 			} else {
-				if (CXWnd* merchantwnd = FindMQ2Window("MerchantWnd"))
+				if (CXWnd* merchantwnd = pMerchantWnd)
 				{
 					if (CListWnd* cLWnd = (CListWnd*)merchantwnd->GetChildItem("MW_ItemList"))
 					{
