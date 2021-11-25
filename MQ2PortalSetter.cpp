@@ -168,7 +168,7 @@ void DrawPortalSetterPanel()
 
 	if (bOlder)
 	{
-		for (int i = 0; i < (bEven ? NumberOfButtons : NumberOfButtons + 1); i++)
+		for (unsigned int i = (bEven ? NumberOfButtons : NumberOfButtons + 1); i < s_zoneinfo.size(); i++)
 		{
 			auto it = s_zoneinfo.begin();
 			std::advance(it, i);
