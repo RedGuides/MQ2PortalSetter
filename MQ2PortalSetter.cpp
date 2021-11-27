@@ -98,22 +98,16 @@ void DrawPortalSetterPanel()
 	if (bDisplaySearch)
 	{
 		static char input[64] = {};
-		static char matchinput[64] = {};
 		static const zonePortalInfo* save = nullptr;
 
 		ImGui::Text("Type in short or long zone name.");
-		if (bool NameInput = ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input)))
-		{
-			if (!ci_equals(matchinput, input))
-				strcpy_s(matchinput, input);
-		}
+		ImGui::InputTextWithHint("zone name", "example: potime / the plane of time", input, IM_ARRAYSIZE(input));
 		ImGui::SameLine();
 		mq::imgui::HelpMarker("You can type in the zone's longname or shortname, and it will display the button to select for that zone.");
 
-
 		for (const zonePortalInfo& info : s_zoneinfo)
 		{
-			if (ci_equals(matchinput, info.shortname) || ci_equals(matchinput, info.longname))
+			if (ci_equals(input, info.shortname) || ci_equals(input, info.longname))
 			{
 				save = &info;
 				break;
@@ -150,11 +144,11 @@ void DrawPortalSetterPanel()
 		// this ensures we don't have an odd number of halfsized buttons.
 		for (int i = 0; i < (bEven ? NumberOfButtons : NumberOfButtons + 1); i++)
 		{
-			auto it = s_zoneinfo.begin();
-			std::advance(it, i);
-			if (ImGui::Button(it->buttonname, fullsize))
+			const zonePortalInfo& info = s_zoneinfo[i];
+
+			if (ImGui::Button(info.buttonname, fullsize))
 			{
-				SetStoneAndStep(it->stonename);
+				SetStoneAndStep(info.stonename);
 			}
 		}
 	}
@@ -170,20 +164,19 @@ void DrawPortalSetterPanel()
 	{
 		for (unsigned int i = (bEven ? NumberOfButtons : NumberOfButtons + 1); i < s_zoneinfo.size(); i++)
 		{
-			auto it = s_zoneinfo.begin();
-			std::advance(it, i);
+			const zonePortalInfo& info = s_zoneinfo[i];
 			if (i % 2)
 			{
 				ImGui::SameLine();
-				if (ImGui::Button(it->buttonname, halfsize))
+				if (ImGui::Button(info.buttonname, halfsize))
 				{
-					SetStoneAndStep(it->stonename);
+					SetStoneAndStep(info.stonename);
 				}
 			}
 			else {
-				if (ImGui::Button(it->buttonname, halfsize))
+				if (ImGui::Button(info.buttonname, halfsize))
 				{
-					SetStoneAndStep(it->stonename);
+					SetStoneAndStep(info.stonename);
 				}
 			}
 		}
@@ -364,6 +357,7 @@ PLUGIN_API void InitializePlugin()
 {
 	DebugSpewAlways("Initializing MQ2PortalSetter");
 	LoadPortalSetterSettings();
+	AddSettingsPanel("plugins/PortalSetter", DrawSettingsPanel);
 }
 
 PLUGIN_API void ShutdownPlugin()
