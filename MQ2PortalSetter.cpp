@@ -53,6 +53,8 @@ struct zonePortalInfo
 };
 
 // TODO:: add indicator for each xpac they come available for usage to only display if that xpac is unlocked
+// TODO:: find a clean way to allow optional expansion information available by either parenthetical (CoV) and/or mouseover
+// -- this was originally not done because for duplicate zones, we should likely *always* have displayed differences, example: Cobalt Scar
 const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
 	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
@@ -60,7 +62,7 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp" },
 	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet" },
 	{ "lcaenium", "Lcaenium", "Lcaenium", "Fragment of the Combine Spire" },
-	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta", "Drowned Katta Castrum Powerstone" },
+	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta: Deluge", "Drowned Katta Castrum Powerstone" },
 	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West" },
 	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall" },
 	{ "Argath", "Argath", "Argath", "Chunk of Argathian Steel" },
