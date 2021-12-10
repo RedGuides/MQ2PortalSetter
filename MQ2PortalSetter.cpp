@@ -66,7 +66,7 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West" },
 	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall" },
 	{ "Argath", "Argath", "Argath", "Chunk of Argathian Steel" },
-	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerott" },
+	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerrott" },
 	{ "brellsrest", "Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore" },
 	{ "dragonscale", "Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite" },
 	{ "potime", "The Plane of Time", "Plane of Time", "Broken Timestone" },
