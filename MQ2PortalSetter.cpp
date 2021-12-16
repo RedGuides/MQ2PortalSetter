@@ -423,7 +423,7 @@ void LoadPortalSetterSettings()
 void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 {
 	char Arg[MAX_STRING] = { 0 };
-	GetArg(Arg, szLine, 1);
+	GetMaybeQuotedArg(Arg, MAX_STRING, szLine, 1);
 	if (strlen(Arg)) {
 
 		static const zonePortalInfo* save = nullptr;
