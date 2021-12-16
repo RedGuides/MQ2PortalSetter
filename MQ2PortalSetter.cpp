@@ -9,7 +9,7 @@
 #include <mq/imgui/ImGuiUtils.h>
 
 PreSetup("MQ2PortalSetter");
-PLUGIN_VERSION(2021.1123);
+PLUGIN_VERSION(2021.1216);
 
 constexpr int ZONEID_GUILD_HALL = 345;
 
@@ -25,6 +25,72 @@ std::string portalStoneName;
 void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
 bool isMerchantPortalSetter();
+
+class MQ2PortalSetterType : public MQ2Type
+{
+public:
+	enum PortalSetterMembers
+	{
+		Version = 1,
+		Step,
+		InProgress,
+	};
+
+	MQ2PortalSetterType() : MQ2Type("PortalSetter")
+	{
+		ScopedTypeMember(PortalSetterMembers, Version);
+		ScopedTypeMember(PortalSetterMembers, Step);
+		ScopedTypeMember(PortalSetterMembers, InProgress);
+	};
+
+	~MQ2PortalSetterType()
+	{
+	}
+
+	virtual bool GetMember(MQVarPtr VarPtr, const char* Member, char* Index, MQTypeVar& Dest) override
+	{
+		MQTypeMember* pMember = MQ2PortalSetterType::FindMember(Member);
+		if (!pMember)
+			return false;
+		if (!pLocalPlayer)
+			return false;
+		switch ((PortalSetterMembers)pMember->ID)
+		{
+			case Version:
+				Dest.Float = MQ2Version;
+				Dest.Type = mq::datatypes::pFloatType;
+				return true;
+
+			case Step:
+				Dest.Int = currentRoutineStep;
+				Dest.Type = mq::datatypes::pIntType;
+				return true;
+
+			case InProgress:
+				Dest.Int = currentRoutineStep > 0;
+				Dest.Type = mq::datatypes::pBoolType;
+				return true;
+		
+			default:
+				break;
+		}
+		return false;
+	}
+
+	bool ToString(MQVarPtr VarPtr, const char* Destination)
+	{
+		return true;
+	}
+};
+
+MQ2PortalSetterType* pPortalSetterType = nullptr;
+
+bool PortalData(const char* szIndex, MQTypeVar& Dest)
+{
+	Dest.DWord = 1;
+	Dest.Type = pPortalSetterType;
+	return true;
+}
 
 PLUGIN_API void OnUpdateImGui()
 {
@@ -354,10 +420,39 @@ void LoadPortalSetterSettings()
 	bGroupZonesByEra = GetPrivateProfileBool("Settings", "GroupZonesByEra", bGroupZonesByEra, INIFileName);
 }
 
+void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
+{
+	char Arg[MAX_STRING] = { 0 };
+	GetArg(Arg, szLine, 1);
+	if (strlen(Arg)) {
+
+		static const zonePortalInfo* save = nullptr;
+		for (const zonePortalInfo& info : s_zoneinfo)
+		{
+			if (ci_equals(Arg, info.shortname) || ci_equals(Arg, info.longname))
+			{
+				save = &info;
+				SetStoneAndStep(save->stonename);
+				return;
+			}
+			else {
+
+			}
+		}
+	}
+	else {
+		WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arPlease provide a long or shortname for the zone you wish to set to portal to.");
+		WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \ayExample: \ao /portalsetter eastwastetwo \ax or \ao /portalsetter \ay\"The Eastern Wastes\"");
+	}
+
+}
 
 PLUGIN_API void InitializePlugin()
 {
 	DebugSpewAlways("Initializing MQ2PortalSetter");
+	AddCommand("/portalsetter", PortalSetterCmd, false, true, true);
+	pPortalSetterType = new MQ2PortalSetterType;
+	AddMQ2Data("PortalSetter", PortalData);
 	LoadPortalSetterSettings();
 	AddSettingsPanel("plugins/PortalSetter", DrawSettingsPanel);
 }
@@ -365,6 +460,11 @@ PLUGIN_API void InitializePlugin()
 PLUGIN_API void ShutdownPlugin()
 {
 	DebugSpewAlways("Shutting down MQ2PortalSetter");
+
+	RemoveCommand("/portalsetter");
+	RemoveMQ2Data("PortalSetter");
+	delete pPortalSetterType;
+	RemoveSettingsPanel("plugins/PortalSetter");
 }
 
 PLUGIN_API void OnPulse()
@@ -380,7 +480,7 @@ PLUGIN_API void OnPulse()
 		//-- If we are out of range then reset state.
 		if (currentRoutineStep > 0 && !inPortalMerchantRange())
 		{
-			WriteChatColor("[MQ2PortalSetter] Out of range of portal attendant, aborting.", CONCOLOR_RED);
+			WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arOut of range of portal attendant, aborting.");
 			bShowWindow = false;
 			currentRoutineStep = 0;
 		}
