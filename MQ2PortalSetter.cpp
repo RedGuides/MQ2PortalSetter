@@ -38,14 +38,9 @@ public:
 
 	MQ2PortalSetterType() : MQ2Type("PortalSetter")
 	{
-		ScopedTypeMember(PortalSetterMembers, Version);
 		ScopedTypeMember(PortalSetterMembers, Step);
 		ScopedTypeMember(PortalSetterMembers, InProgress);
 	};
-
-	~MQ2PortalSetterType()
-	{
-	}
 
 	virtual bool GetMember(MQVarPtr VarPtr, const char* Member, char* Index, MQTypeVar& Dest) override
 	{
@@ -56,11 +51,6 @@ public:
 			return false;
 		switch ((PortalSetterMembers)pMember->ID)
 		{
-			case Version:
-				Dest.Float = MQ2Version;
-				Dest.Type = mq::datatypes::pFloatType;
-				return true;
-
 			case Step:
 				Dest.Int = currentRoutineStep;
 				Dest.Type = mq::datatypes::pIntType;
@@ -75,11 +65,6 @@ public:
 				break;
 		}
 		return false;
-	}
-
-	bool ToString(MQVarPtr VarPtr, const char* Destination)
-	{
-		return true;
 	}
 };
 
@@ -424,27 +409,21 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 {
 	char Arg[MAX_STRING] = { 0 };
 	GetMaybeQuotedArg(Arg, MAX_STRING, szLine, 1);
-	if (strlen(Arg)) {
 
-		static const zonePortalInfo* save = nullptr;
+	if (Arg[0] != '\0')
+	{
 		for (const zonePortalInfo& info : s_zoneinfo)
 		{
 			if (ci_equals(Arg, info.shortname) || ci_equals(Arg, info.longname))
 			{
-				save = &info;
-				SetStoneAndStep(save->stonename);
+				SetStoneAndStep(info.stonename);
 				return;
-			}
-			else {
-
 			}
 		}
 	}
-	else {
-		WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arPlease provide a long or shortname for the zone you wish to set to portal to.");
-		WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \ayExample: \ao /portalsetter eastwastetwo \ax or \ao /portalsetter \ay\"The Eastern Wastes\"");
-	}
-
+	
+	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arPlease provide a long or shortname for the zone you wish to set to portal to.");
+	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \ayExample: \ao /portalsetter eastwastetwo \ax or \ao /portalsetter \ay\"The Eastern Wastes\"");
 }
 
 PLUGIN_API void InitializePlugin()
