@@ -282,34 +282,34 @@ void ImGui_OnUpdate()
 	ImGui::End();
 }
 
-// char* for Target to work
-char* getPortalVendorName() {
-	if (pLocalPC->zoneId == ZONEID_GUILD_HALL)
-		return "Zeflmin Werlikanin";
-	return "Teleportation Assistant";
+SPAWNINFO* VendorSpawn() {
+	if (SPAWNINFO* vendor = GetSpawnByPartialName("Zeflmin Werlikanin"))
+	{
+		return vendor;
+	}
+
+	return GetSpawnByPartialName("Teleportation Assistant");
 }
+
 
 bool isMerchantPortalSetter() {
 	if (pActiveMerchant)
 	{
-		char zMerchantName[EQ_MAX_NAME];
-		strcpy_s(zMerchantName, pActiveMerchant->Name);
-		CleanupName(zMerchantName, sizeof(zMerchantName), false, false);
-		if (strstr(zMerchantName, getPortalVendorName()))
+		if (SPAWNINFO* vendor = VendorSpawn())
 		{
-			return true;
+			return strcmp(pActiveMerchant->Name, vendor->Name) == 0;
 		}
 	}
 	return false;
 }
 
 bool inPortalMerchantRange() {
-	MQSpawnSearch ssSpawn;
-	ClearSearchSpawn(&ssSpawn);
-	ssSpawn.FRadius = 20;
-	ssSpawn.SpawnType = NPC;
-	strcpy_s(ssSpawn.szName, getPortalVendorName());
-	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
+	if (SPAWNINFO* vendor = VendorSpawn())
+	{
+		return Get3DDistance(vendor->X, vendor->Y, vendor->Z, pLocalPlayer->X, pLocalPlayer->Y, pLocalPlayer->X) <= 20.0;
+	}
+
+	return false;
 }
 
 void setPortal(const std::string& setPortalStoneName) {
@@ -360,7 +360,10 @@ void setPortal(const std::string& setPortalStoneName) {
 			break;
 		}
 		case 4: {
-			Target(GetCharInfo()->pSpawn, getPortalVendorName());
+			if (VendorSpawn())
+			{
+				Target(GetCharInfo()->pSpawn, VendorSpawn()->Name);
+			}
 			currentRoutineStep++;
 			break;
 		}
