@@ -295,7 +295,7 @@ SPAWNINFO* GetVendorSpawn() {
 bool isMerchantPortalSetter() {
 	if (pActiveMerchant)
 	{
-		if (SPAWNINFO* vendor = VendorSpawn())
+		if (SPAWNINFO* vendor = GetVendorSpawn())
 		{
 			return strcmp(pActiveMerchant->Name, vendor->Name) == 0;
 		}
@@ -304,9 +304,9 @@ bool isMerchantPortalSetter() {
 }
 
 bool inPortalMerchantRange() {
-	if (SPAWNINFO* vendor = VendorSpawn())
+	if (SPAWNINFO* vendor = GetVendorSpawn())
 	{
-		return Get3DDistance(vendor->X, vendor->Y, vendor->Z, pLocalPlayer->X, pLocalPlayer->Y, pLocalPlayer->X) <= 20.0;
+		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
 	}
 
 	return false;
@@ -360,9 +360,9 @@ void setPortal(const std::string& setPortalStoneName) {
 			break;
 		}
 		case 4: {
-			if (VendorSpawn())
+			if (SPAWNINFO* vendor = GetVendorSpawn())
 			{
-				Target(GetCharInfo()->pSpawn, VendorSpawn()->Name);
+				Target(GetCharInfo()->pSpawn, vendor->Name);
 			}
 			currentRoutineStep++;
 			break;
