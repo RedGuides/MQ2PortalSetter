@@ -297,7 +297,7 @@ bool isMerchantPortalSetter() {
 	{
 		if (SPAWNINFO* vendor = GetVendorSpawn())
 		{
-			return strcmp(pActiveMerchant->Name, vendor->Name) == 0;
+			return string_equals(pActiveMerchant->Name, vendor->Name);
 		}
 	}
 	return false;
@@ -362,7 +362,7 @@ void setPortal(const std::string& setPortalStoneName) {
 		case 4: {
 			if (SPAWNINFO* vendor = GetVendorSpawn())
 			{
-				Target(GetCharInfo()->pSpawn, vendor->Name);
+				Target(pLocalPlayer, vendor->Name);
 			}
 			currentRoutineStep++;
 			break;
