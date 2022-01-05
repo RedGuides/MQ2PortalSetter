@@ -282,7 +282,7 @@ void ImGui_OnUpdate()
 	ImGui::End();
 }
 
-SPAWNINFO* VendorSpawn() {
+SPAWNINFO* GetVendorSpawn() {
 	if (SPAWNINFO* vendor = GetSpawnByPartialName("Zeflmin Werlikanin"))
 	{
 		return vendor;
