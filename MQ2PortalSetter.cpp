@@ -109,14 +109,14 @@ struct zonePortalInfo
 const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
 	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
-	{ "eastwastetwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
+	{ "eastwastestwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
 	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp" },
 	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet" },
-	{ "lcaenium", "Lcaenium", "Lcaenium", "Fragment of the Combine Spire" },
+	{ "lceanium", "Lceanium", "Lceanium", "Fragment of the Combine Spire" },
 	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta: Deluge", "Drowned Katta Castrum Powerstone" },
 	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West" },
 	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall" },
-	{ "Argath", "Argath", "Argath", "Chunk of Argathian Steel" },
+	{ "argath", "Argath", "Argath", "Chunk of Argathian Steel" },
 	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerrott" },
 	{ "brellsrest", "Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore" },
 	{ "dragonscale", "Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite" },
@@ -124,9 +124,9 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "kattacastrum", "Katta Castrum", "Katta", "Katta Castrum Powerstone" },
 	{ "mesa", "Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone" }, // ' and not ` for the "Goru'kar mesa sandstone"
 	{ "arcstone", "Arcstone", "Arcstone", "Arcstone Spirit Sapphire" },
-	{ "posky", "The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan" },
+	{ "airplane", "The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan" },
 	{ "cobaltscar", "Cobalt Scar", "Cobalt Scar", "Velium Shard of Cobalt Scar" },
-	{ "pohate", "The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk" },
+	{ "hateplane", "The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk" },
 	{ "barindu", "Barindu, Hanging Gardens", "Barindu", "Etched Marble of Barindu" },
 	{ "wallofslaughter", "Wall of Slaughter", "Wall of Slaughter", "Chipped Shard of Slaughter" },
 	{ "twilight", "The Twilight Sea", "Twilight Sea", "Shadowed Sand of the Twilight Sea" },
@@ -282,34 +282,34 @@ void ImGui_OnUpdate()
 	ImGui::End();
 }
 
-// char* for Target to work
-char* getPortalVendorName() {
-	if (pLocalPC->zoneId == ZONEID_GUILD_HALL)
-		return "Zeflmin Werlikanin";
-	return "Teleportation Assistant";
+SPAWNINFO* GetVendorSpawn() {
+	if (SPAWNINFO* vendor = GetSpawnByPartialName("Zeflmin Werlikanin"))
+	{
+		return vendor;
+	}
+
+	return GetSpawnByPartialName("Teleportation Assistant");
 }
+
 
 bool isMerchantPortalSetter() {
 	if (pActiveMerchant)
 	{
-		char zMerchantName[EQ_MAX_NAME];
-		strcpy_s(zMerchantName, pActiveMerchant->Name);
-		CleanupName(zMerchantName, sizeof(zMerchantName), false, false);
-		if (strstr(zMerchantName, getPortalVendorName()))
+		if (SPAWNINFO* vendor = GetVendorSpawn())
 		{
-			return true;
+			return string_equals(pActiveMerchant->Name, vendor->Name);
 		}
 	}
 	return false;
 }
 
 bool inPortalMerchantRange() {
-	MQSpawnSearch ssSpawn;
-	ClearSearchSpawn(&ssSpawn);
-	ssSpawn.FRadius = 20;
-	ssSpawn.SpawnType = NPC;
-	strcpy_s(ssSpawn.szName, getPortalVendorName());
-	return SearchThroughSpawns(&ssSpawn, pControlledPlayer) != nullptr;
+	if (SPAWNINFO* vendor = GetVendorSpawn())
+	{
+		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
+	}
+
+	return false;
 }
 
 void setPortal(const std::string& setPortalStoneName) {
@@ -360,7 +360,10 @@ void setPortal(const std::string& setPortalStoneName) {
 			break;
 		}
 		case 4: {
-			Target(GetCharInfo()->pSpawn, getPortalVendorName());
+			if (SPAWNINFO* vendor = GetVendorSpawn())
+			{
+				Target(pLocalPlayer, vendor->Name);
+			}
 			currentRoutineStep++;
 			break;
 		}
