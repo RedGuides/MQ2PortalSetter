@@ -109,7 +109,7 @@ struct zonePortalInfo
 const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
 	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
-	{ "eastwastetwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
+	{ "eastwastestwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
 	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp" },
 	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet" },
 	{ "lceanium", "Lceanium", "Lceanium", "Fragment of the Combine Spire" },
