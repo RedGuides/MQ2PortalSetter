@@ -112,7 +112,7 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "eastwastetwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
 	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp" },
 	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet" },
-	{ "lcaenium", "Lcaenium", "Lcaenium", "Fragment of the Combine Spire" },
+	{ "lceanium", "Lceanium", "Lceanium", "Fragment of the Combine Spire" },
 	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta: Deluge", "Drowned Katta Castrum Powerstone" },
 	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West" },
 	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall" },
