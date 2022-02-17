@@ -15,6 +15,8 @@ constexpr int ZONEID_GUILD_HALL = 345;
 
 int currentRoutineStep = 0;
 
+int vendorID = 0;
+
 static bool bShowWindow = false;
 
 bool bDisplaySearch = true;
@@ -24,7 +26,9 @@ std::string portalStoneName;
 
 void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
-bool isMerchantPortalSetter();
+bool SpawnMatchesVendor();
+bool FoundPortalMerchant();
+int GetVendorID();
 
 class MQ2PortalSetterType : public MQ2Type
 {
@@ -81,7 +85,7 @@ PLUGIN_API void OnUpdateImGui()
 {
 	if (GetGameState() == GAMESTATE_INGAME)
 	{
-		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && isMerchantPortalSetter())
+		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && FoundPortalMerchant())
 		{
 			bShowWindow = true;
 			ImGui_OnUpdate();
@@ -291,20 +295,43 @@ SPAWNINFO* GetVendorSpawn() {
 	return GetSpawnByPartialName("Teleportation Assistant");
 }
 
+bool FoundPortalMerchant() {
+	if (GetVendorID())
+		return true;
+	return false;
+}
 
-bool isMerchantPortalSetter() {
+int GetVendorID() {
 	if (pActiveMerchant)
 	{
-		if (SPAWNINFO* vendor = GetVendorSpawn())
+		if (SpawnMatchesVendor())
 		{
-			return string_equals(pActiveMerchant->Name, vendor->Name);
+			vendorID = pActiveMerchant->SpawnID;
+		}
+		else
+		{
+			vendorID = 0;
 		}
 	}
+
+	return vendorID;
+}
+
+bool SpawnMatchesVendor() {
+
+	char szCleanName[EQ_MAX_NAME] = { 0 };
+	strcpy_s(szCleanName, pActiveMerchant->Name);
+	CleanupName(szCleanName, sizeof(szCleanName), false);
+
+	if (string_equals(szCleanName, "Teleportation Assistant") || string_equals(szCleanName, "Zeflmin Werlikanin")) {
+		return true;
+	}
+
 	return false;
 }
 
 bool inPortalMerchantRange() {
-	if (SPAWNINFO* vendor = GetVendorSpawn())
+	if (SPAWNINFO* vendor = GetSpawnByID(vendorID))
 	{
 		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
 	}
@@ -360,7 +387,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			break;
 		}
 		case 4: {
-			if (SPAWNINFO* vendor = GetVendorSpawn())
+			if (SPAWNINFO* vendor = GetSpawnByID(vendorID))
 			{
 				Target(pLocalPlayer, vendor->Name);
 			}
