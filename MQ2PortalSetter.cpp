@@ -26,6 +26,7 @@ std::string portalStoneName;
 
 void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
+int SetAndGetVendorID();
 
 class MQ2PortalSetterType : public MQ2Type
 {
