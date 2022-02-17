@@ -26,9 +26,6 @@ std::string portalStoneName;
 
 void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
-bool SpawnMatchesVendor();
-bool FoundPortalMerchant();
-int GetVendorID();
 
 class MQ2PortalSetterType : public MQ2Type
 {
@@ -85,7 +82,7 @@ PLUGIN_API void OnUpdateImGui()
 {
 	if (GetGameState() == GAMESTATE_INGAME)
 	{
-		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && FoundPortalMerchant())
+		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && SetAndGetVendorID() > 0)
 		{
 			bShowWindow = true;
 			ImGui_OnUpdate();
@@ -295,13 +292,16 @@ SPAWNINFO* GetVendorSpawn() {
 	return GetSpawnByPartialName("Teleportation Assistant");
 }
 
-bool FoundPortalMerchant() {
-	if (GetVendorID())
-		return true;
-	return false;
+bool SpawnMatchesVendor() {
+
+	char szCleanName[EQ_MAX_NAME] = { 0 };
+	strcpy_s(szCleanName, pActiveMerchant->Name);
+	CleanupName(szCleanName, sizeof(szCleanName), false, false);
+
+	return string_equals(szCleanName, "Teleportation Assistant") || string_equals(szCleanName, "Zeflmin Werlikanin");
 }
 
-int GetVendorID() {
+int SetAndGetVendorID() {
 	if (pActiveMerchant)
 	{
 		if (SpawnMatchesVendor())
@@ -315,19 +315,6 @@ int GetVendorID() {
 	}
 
 	return vendorID;
-}
-
-bool SpawnMatchesVendor() {
-
-	char szCleanName[EQ_MAX_NAME] = { 0 };
-	strcpy_s(szCleanName, pActiveMerchant->Name);
-	CleanupName(szCleanName, sizeof(szCleanName), false);
-
-	if (string_equals(szCleanName, "Teleportation Assistant") || string_equals(szCleanName, "Zeflmin Werlikanin")) {
-		return true;
-	}
-
-	return false;
 }
 
 bool inPortalMerchantRange() {
@@ -494,7 +481,7 @@ PLUGIN_API void OnPulse()
 			currentRoutineStep = 0;
 		}
 
-		setPortal(portalStoneName.c_str());
+		setPortal(portalStoneName);
 
 		// Wait 1 second before running again
 		PulseTimer = std::chrono::steady_clock::now() + std::chrono::seconds(1);
