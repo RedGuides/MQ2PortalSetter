@@ -15,6 +15,8 @@ constexpr int ZONEID_GUILD_HALL = 345;
 
 int currentRoutineStep = 0;
 
+int vendorID = 0;
+
 static bool bShowWindow = false;
 
 bool bDisplaySearch = true;
@@ -24,7 +26,7 @@ std::string portalStoneName;
 
 void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
-bool isMerchantPortalSetter();
+int SetAndGetVendorID();
 
 class MQ2PortalSetterType : public MQ2Type
 {
@@ -81,7 +83,7 @@ PLUGIN_API void OnUpdateImGui()
 {
 	if (GetGameState() == GAMESTATE_INGAME)
 	{
-		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && isMerchantPortalSetter())
+		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && SetAndGetVendorID() > 0)
 		{
 			bShowWindow = true;
 			ImGui_OnUpdate();
@@ -291,20 +293,33 @@ SPAWNINFO* GetVendorSpawn() {
 	return GetSpawnByPartialName("Teleportation Assistant");
 }
 
+bool SpawnMatchesVendor() {
 
-bool isMerchantPortalSetter() {
+	char szCleanName[EQ_MAX_NAME] = { 0 };
+	strcpy_s(szCleanName, pActiveMerchant->Name);
+	CleanupName(szCleanName, sizeof(szCleanName), false, false);
+
+	return string_equals(szCleanName, "Teleportation Assistant") || string_equals(szCleanName, "Zeflmin Werlikanin");
+}
+
+int SetAndGetVendorID() {
 	if (pActiveMerchant)
 	{
-		if (SPAWNINFO* vendor = GetVendorSpawn())
+		if (SpawnMatchesVendor())
 		{
-			return string_equals(pActiveMerchant->Name, vendor->Name);
+			vendorID = pActiveMerchant->SpawnID;
+		}
+		else
+		{
+			vendorID = 0;
 		}
 	}
-	return false;
+
+	return vendorID;
 }
 
 bool inPortalMerchantRange() {
-	if (SPAWNINFO* vendor = GetVendorSpawn())
+	if (SPAWNINFO* vendor = GetSpawnByID(vendorID))
 	{
 		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
 	}
@@ -360,7 +375,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			break;
 		}
 		case 4: {
-			if (SPAWNINFO* vendor = GetVendorSpawn())
+			if (SPAWNINFO* vendor = GetSpawnByID(vendorID))
 			{
 				Target(pLocalPlayer, vendor->Name);
 			}
@@ -467,7 +482,7 @@ PLUGIN_API void OnPulse()
 			currentRoutineStep = 0;
 		}
 
-		setPortal(portalStoneName.c_str());
+		setPortal(portalStoneName);
 
 		// Wait 1 second before running again
 		PulseTimer = std::chrono::steady_clock::now() + std::chrono::seconds(1);
