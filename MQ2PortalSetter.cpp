@@ -139,7 +139,7 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "lavastorm", "Lavastorm", "Lavastorm", "Lavastorm Magma" },
 	{ "tox", "Toxxulia", "Toxxulia", "Opal of Toxxulia" },
 	{ "northkarana", "North Karana", "North Karana", "Karana Plains Pebble" },
-	{ "commonlands", "Commonlands", "Commonlands", "Grassy Pebble of the Commonalnds" },
+	{ "commonlands", "Commonlands", "Commonlands", "Grassy Pebble of The Commonlands" },
 	{ "gfaydark", "The Greater Faydark", "Greater Faydark", "Forest Emerald of Faydark" },
 };
 
