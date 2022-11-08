@@ -262,7 +262,7 @@ void ImGui_OnUpdate()
 
 	ImGui::SetNextWindowSize(ImVec2(400, 440), ImGuiCond_FirstUseEver);
 
-	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_MenuBar))
+	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_None))
 	{
 		if (ImGui::BeginTabBar("PortalSetterTab", ImGuiTabBarFlags_None))
 		{
