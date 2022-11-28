@@ -62,7 +62,7 @@ public:
 				Dest.Int = currentRoutineStep > 0;
 				Dest.Type = mq::datatypes::pBoolType;
 				return true;
-		
+
 			default:
 				break;
 		}
@@ -103,52 +103,71 @@ struct zonePortalInfo
 	const char* longname;
 	const char* buttonname;
 	const char* stonename;
+	int expansion;
 };
 
-// TODO:: add indicator for each xpac they come available for usage to only display if that xpac is unlocked
+
 // TODO:: find a clean way to allow optional expansion information available by either parenthetical (CoV) and/or mouseover
 // -- this was originally not done because for duplicate zones, we should likely *always* have displayed differences, example: Cobalt Scar
+// EXPANSION Info: Guild Hall (and thus porter) wasn't introduced until Dragons of Norrath.
 const std::vector<zonePortalInfo> s_zoneinfo = {
-	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest" },
-	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell" },
-	{ "eastwastestwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone" },
-	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp" },
-	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet" },
-	{ "lceanium", "Lceanium", "Lceanium", "Fragment of the Combine Spire" },
-	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta: Deluge", "Drowned Katta Castrum Powerstone" },
-	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West" },
-	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall" },
-	{ "argath", "Argath", "Argath", "Chunk of Argathian Steel" },
-	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerrott" },
-	{ "brellsrest", "Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore" },
-	{ "dragonscale", "Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite" },
-	{ "potime", "The Plane of Time", "Plane of Time", "Broken Timestone" },
-	{ "kattacastrum", "Katta Castrum", "Katta", "Katta Castrum Powerstone" },
-	{ "mesa", "Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone" }, // ' and not ` for the "Goru'kar mesa sandstone"
-	{ "arcstone", "Arcstone", "Arcstone", "Arcstone Spirit Sapphire" },
-	{ "airplane", "The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan" },
-	{ "cobaltscar", "Cobalt Scar", "Cobalt Scar", "Velium Shard of Cobalt Scar" },
-	{ "hateplane", "The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk" },
-	{ "barindu", "Barindu, Hanging Gardens", "Barindu", "Etched Marble of Barindu" },
-	{ "wallofslaughter", "Wall of Slaughter", "Wall of Slaughter", "Chipped Shard of Slaughter" },
-	{ "twilight", "The Twilight Sea", "Twilight Sea", "Shadowed Sand of the Twilight Sea" },
-	{ "eastkorlach", "Undershore", "Undershore", "Undershore Coral" },
-	{ "dreadlands", "Dreadlands", "Dreadlands", "Shattered Bone of the Dreadlands" },
-	{ "stonebrunt", "Stonebrunt Mountains", "Stonebrunt", "Moss Agate of Stonebrunt" },
-	{ "iceclad", "Iceclad Ocean", "Iceclad Ocean", "Frozen Shard of Iceclad" },
-	{ "lavastorm", "Lavastorm", "Lavastorm", "Lavastorm Magma" },
-	{ "tox", "Toxxulia", "Toxxulia", "Opal of Toxxulia" },
-	{ "northkarana", "North Karana", "North Karana", "Karana Plains Pebble" },
-	{ "commonlands", "Commonlands", "Commonlands", "Grassy Pebble of The Commonlands" },
-	{ "gfaydark", "The Greater Faydark", "Greater Faydark", "Forest Emerald of Faydark" },
+	{ "sharvahltwo", "Shar Vahl, Divided", "Shar Vahl (NoS)", "Tri-Spirit Embossed Token", EXPANSION_NOS },
+	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest", EXPANSION_TOL },
+	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell", EXPANSION_COV },
+	{ "eastwastestwo", "The Eastern Wastes", "Eastern Wastes (ToV)", "Brilliant Frigid Gemstone", EXPANSION_TOV },
+	{ "stratos", "Stratos: Zephyr's Flight", "Stratos", "Burning Lamp", EXPANSION_TBL },
+	{ "overtheretwo", "The Overthere", "Overthere", "Miniature Worker's Sledge Mallet", EXPANSION_RoS },
+	{ "lceanium", "Lceanium", "Lceanium", "Fragment of the Combine Spire", EXPANSION_EoK },
+	{ "kattacastrumb", "Katta Castrum, The Deluge", "Katta: Deluge", "Drowned Katta Castrum Powerstone", EXPANSION_TDS },
+	{ "ethernere", "Ethernere Tainted West Karana", "Ethernere Tainted", "Stormstone of the West", EXPANSION_CotF },
+	{ "shardslanding", "Shard's Landing", "Shard's Landing", "Stone of the Shard's Fall", EXPANSION_RoF },
+	{ "argath", "Argath", "Argath", "Chunk of Argathian Steel", EXPANSION_VoA },
+	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerrott", EXPANSION_HoT },
+	{ "brellsrest", "Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore", EXPANSION_UFT },
+	{ "dragonscale", "Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite", EXPANSION_SoD },
+	{ "potime", "The Plane of Time", "Plane of Time", "Broken Timestone", EXPANSION_DoN },
+	{ "kattacastrum", "Katta Castrum", "Katta", "Katta Castrum Powerstone", EXPANSION_TBS },
+	{ "mesa", "Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone", EXPANSION_TSS }, // ' and not ` for the "Goru'kar mesa sandstone"
+	{ "arcstone", "Arcstone", "Arcstone", "Arcstone Spirit Sapphire", EXPANSION_PoR },
+	{ "airplane", "The Plane of Sky", "Plane of Sky", "Cloudy Stone of Veeshan", EXPANSION_DoN },
+	{ "cobaltscar", "Cobalt Scar", "Cobalt Scar", "Velium Shard of Cobalt Scar", EXPANSION_DoN },
+	{ "hateplane", "The Plane of Hate", "Plane of Hate", "Fuligan Soulstone of Innoruuk", EXPANSION_DoN },
+	{ "barindu", "Barindu, Hanging Gardens", "Barindu", "Etched Marble of Barindu", EXPANSION_DoN },
+	{ "wallofslaughter", "Wall of Slaughter", "Wall of Slaughter", "Chipped Shard of Slaughter", EXPANSION_DoN },
+	{ "twilight", "The Twilight Sea", "Twilight Sea", "Shadowed Sand of the Twilight Sea", EXPANSION_DoN },
+	{ "eastkorlach", "Undershore", "Undershore", "Undershore Coral", EXPANSION_DoD },
+	{ "dreadlands", "Dreadlands", "Dreadlands", "Shattered Bone of the Dreadlands", EXPANSION_DoN },
+	{ "stonebrunt", "Stonebrunt Mountains", "Stonebrunt", "Moss Agate of Stonebrunt", EXPANSION_DoN },
+	{ "iceclad", "Iceclad Ocean", "Iceclad Ocean", "Frozen Shard of Iceclad", EXPANSION_DoN },
+	{ "lavastorm", "Lavastorm", "Lavastorm", "Lavastorm Magma", EXPANSION_DoN },
+	{ "tox", "Toxxulia", "Toxxulia", "Opal of Toxxulia", EXPANSION_DoN },
+	{ "northkarana", "North Karana", "North Karana", "Karana Plains Pebble", EXPANSION_DoN },
+	{ "commonlands", "Commonlands", "Commonlands", "Grassy Pebble of The Commonlands", EXPANSION_DoN },
+	{ "gfaydark", "The Greater Faydark", "Greater Faydark", "Forest Emerald of Faydark", EXPANSION_DoN },
 };
 
+//We need to validate that we should display a particular portal based on the expansion it is available
+std::vector<zonePortalInfo> GetZonestoDisplay()
+{
+	std::vector<zonePortalInfo> zonestodisplay = {};
+	for (int i = 0; i < s_zoneinfo.size(); ++i)
+	{
+		if (HasExpansion(s_zoneinfo.at(i).expansion))
+		{
+			zonestodisplay.push_back(s_zoneinfo.at(i));
+		}
+	}
+
+	return zonestodisplay;
+}
 void DrawPortalSetterPanel()
 {
 	const ImVec2 halfsize = ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f);
 	const ImVec2 fullsize = ImVec2(ImGui::GetWindowSize().x * 1.0f, 0.0f);
-	const bool bEven = s_zoneinfo.size() % 2 == 0;
-	const int NumberOfButtons = 4;
+	std::vector displayableZones = GetZonestoDisplay();
+	// if displayableZones.size() is even, we want to to display 4 fullsized buttons, otherwise 5
+	// this ensures we don't have an odd number of halfsized buttons.
+	const int NumberOfFullSizeButtons = displayableZones.size() % 2 == 0 ? 4 : 5;
 
 	if (bDisplaySearch)
 	{
@@ -160,12 +179,12 @@ void DrawPortalSetterPanel()
 		ImGui::SameLine();
 		mq::imgui::HelpMarker("You can type in the zone's longname or shortname, and it will display the button to select for that zone.");
 
-		for (const zonePortalInfo& info : s_zoneinfo)
+		for (const zonePortalInfo& info : displayableZones)
 		{
 			if (ci_equals(input, info.shortname) || ci_equals(input, info.longname))
 			{
 				save = &info;
-				break;
+					break;
 			}
 		}
 
@@ -195,12 +214,9 @@ void DrawPortalSetterPanel()
 
 	if (bModern)
 	{
-		// if vZoneInfo.size() is even, we want to to display 4 fullsized buttons, otherwise 5
-		// this ensures we don't have an odd number of halfsized buttons.
-		for (int i = 0; i < (bEven ? NumberOfButtons : NumberOfButtons + 1); i++)
+		for (int i = 0; i < NumberOfFullSizeButtons; i++)
 		{
-			const zonePortalInfo& info = s_zoneinfo[i];
-
+			const zonePortalInfo& info = displayableZones[i];
 			if (ImGui::Button(info.buttonname, fullsize))
 			{
 				SetStoneAndStep(info.stonename);
@@ -217,18 +233,29 @@ void DrawPortalSetterPanel()
 
 	if (bOlder)
 	{
-		for (unsigned int i = (bEven ? NumberOfButtons : NumberOfButtons + 1); i < s_zoneinfo.size(); i++)
+		for (unsigned int i = NumberOfFullSizeButtons; i < displayableZones.size(); i++)
 		{
-			const zonePortalInfo& info = s_zoneinfo[i];
+			const zonePortalInfo& info = displayableZones[i];
+			// we need to alternate which side of they are on
 			if (i % 2)
 			{
-				ImGui::SameLine();
+				// if the number of fullsize buttons is odd
+				// we need to sameline on the even side
+				if (NumberOfFullSizeButtons % 2 == 0)
+					ImGui::SameLine();
+
 				if (ImGui::Button(info.buttonname, halfsize))
 				{
 					SetStoneAndStep(info.stonename);
 				}
 			}
-			else {
+			else
+			{
+				// if the number of fullsize buttons is even
+				// we need to sameline on the odd side
+				if (NumberOfFullSizeButtons % 2)
+					ImGui::SameLine();
+
 				if (ImGui::Button(info.buttonname, halfsize))
 				{
 					SetStoneAndStep(info.stonename);
@@ -439,7 +466,7 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 			}
 		}
 	}
-	
+
 	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arPlease provide a long or shortname for the zone you wish to set to portal to.");
 	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \ayExample: \ao /portalsetter eastwastetwo \ax or \ao /portalsetter \ay\"The Eastern Wastes\"");
 }
