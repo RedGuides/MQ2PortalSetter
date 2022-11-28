@@ -24,6 +24,17 @@ bool bGroupZonesByEra = false;
 
 std::string portalStoneName;
 
+struct zonePortalInfo
+{
+	const char* shortname;
+	const char* longname;
+	const char* buttonname;
+	const char* stonename;
+	int expansion;
+};
+
+std::vector<zonePortalInfo> displayableZones;
+
 void setPortal(const std::string& setPortalStoneName);
 void ImGui_OnUpdate();
 int SetAndGetVendorID();
@@ -79,34 +90,6 @@ bool PortalData(const char* szIndex, MQTypeVar& Dest)
 	return true;
 }
 
-PLUGIN_API void OnUpdateImGui()
-{
-	if (GetGameState() == GAMESTATE_INGAME)
-	{
-		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && SetAndGetVendorID() > 0)
-		{
-			bShowWindow = true;
-			ImGui_OnUpdate();
-		}
-	}
-}
-
-void SetStoneAndStep(const std::string& stoneName, int step = 1)
-{
-	portalStoneName = stoneName;
-	currentRoutineStep = step;
-}
-
-struct zonePortalInfo
-{
-	const char* shortname;
-	const char* longname;
-	const char* buttonname;
-	const char* stonename;
-	int expansion;
-};
-
-
 // TODO:: find a clean way to allow optional expansion information available by either parenthetical (CoV) and/or mouseover
 // -- this was originally not done because for duplicate zones, we should likely *always* have displayed differences, example: Cobalt Scar
 // EXPANSION Info: Guild Hall (and thus porter) wasn't introduced until Dragons of Norrath.
@@ -147,24 +130,51 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 };
 
 //We need to validate that we should display a particular portal based on the expansion it is available
-std::vector<zonePortalInfo> GetZonestoDisplay()
+void GetZonesToDisplay()
 {
-	std::vector<zonePortalInfo> zonestodisplay = {};
+	if (!displayableZones.empty())
+		displayableZones.clear();
+
 	for (int i = 0; i < s_zoneinfo.size(); ++i)
 	{
-		if (HasExpansion(s_zoneinfo.at(i).expansion))
+		if (HasExpansion(s_zoneinfo[i].expansion))
 		{
-			zonestodisplay.push_back(s_zoneinfo.at(i));
+			WriteChatf("%s", s_zoneinfo[i].shortname);
+			displayableZones.push_back(s_zoneinfo[i]);
 		}
 	}
-
-	return zonestodisplay;
 }
+
+PLUGIN_API void OnUpdateImGui()
+{
+	if (GetGameState() == GAMESTATE_INGAME)
+	{
+		if (pMerchantWnd && pMerchantWnd->IsVisible() && currentRoutineStep < 4 && SetAndGetVendorID() > 0)
+		{
+			if (!bShowWindow) {
+				bShowWindow = true;
+				GetZonesToDisplay();
+			}
+			ImGui_OnUpdate();
+		}
+		else
+		{
+			if (bShowWindow)
+				bShowWindow = false;
+		}
+	}
+}
+
+void SetStoneAndStep(const std::string& stoneName, int step = 1)
+{
+	portalStoneName = stoneName;
+	currentRoutineStep = step;
+}
+
 void DrawPortalSetterPanel()
 {
 	const ImVec2 halfsize = ImVec2(ImGui::GetWindowSize().x * 0.5f, 0.0f);
 	const ImVec2 fullsize = ImVec2(ImGui::GetWindowSize().x * 1.0f, 0.0f);
-	std::vector displayableZones = GetZonestoDisplay();
 	// if displayableZones.size() is even, we want to to display 4 fullsized buttons, otherwise 5
 	// this ensures we don't have an odd number of halfsized buttons.
 	const int NumberOfFullSizeButtons = displayableZones.size() % 2 == 0 ? 4 : 5;
@@ -311,8 +321,8 @@ void ImGui_OnUpdate()
 	ImGui::End();
 }
 
-SPAWNINFO* GetVendorSpawn() {
-	if (SPAWNINFO* vendor = GetSpawnByPartialName("Zeflmin Werlikanin"))
+PlayerClient* GetVendorSpawn() {
+	if (PlayerClient* vendor = GetSpawnByPartialName("Zeflmin Werlikanin"))
 	{
 		return vendor;
 	}
@@ -346,7 +356,7 @@ int SetAndGetVendorID() {
 }
 
 bool inPortalMerchantRange() {
-	if (SPAWNINFO* vendor = GetSpawnByID(vendorID))
+	if (PlayerClient* vendor = GetSpawnByID(vendorID))
 	{
 		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
 	}
