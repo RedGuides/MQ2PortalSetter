@@ -412,7 +412,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			break;
 		}
 		case 4: {
-			if (SPAWNINFO* vendor = GetSpawnByID(vendorID))
+			if (PlayerClient* vendor = GetSpawnByID(vendorID))
 			{
 				Target(pLocalPlayer, vendor->Name);
 			}
