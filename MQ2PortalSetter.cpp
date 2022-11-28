@@ -184,7 +184,7 @@ void DrawPortalSetterPanel()
 			if (ci_equals(input, info.shortname) || ci_equals(input, info.longname))
 			{
 				save = &info;
-					break;
+				break;
 			}
 		}
 
