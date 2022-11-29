@@ -132,7 +132,6 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 //We need to validate that we should display a particular portal based on the expansion it is available
 void GetZonesToDisplay()
 {
-	if (!displayableZones.empty())
 		displayableZones.clear();
 
 	for (int i = 0; i < s_zoneinfo.size(); ++i)
@@ -159,8 +158,7 @@ PLUGIN_API void OnUpdateImGui()
 		}
 		else
 		{
-			if (bShowWindow)
-				bShowWindow = false;
+			bShowWindow = false;
 		}
 	}
 }
