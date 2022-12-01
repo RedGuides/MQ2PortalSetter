@@ -138,7 +138,6 @@ void GetZonesToDisplay()
 	{
 		if (HasExpansion(s_zoneinfo[i].expansion))
 		{
-			WriteChatf("%s", s_zoneinfo[i].shortname);
 			displayableZones.push_back(s_zoneinfo[i]);
 		}
 	}
