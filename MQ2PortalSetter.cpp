@@ -134,7 +134,7 @@ void GetZonesToDisplay()
 {
 		displayableZones.clear();
 
-	for (int i = 0; i < s_zoneinfo.size(); ++i)
+	for (int i = 0; i < static_cast<int>(s_zoneinfo.size()); ++i)
 	{
 		if (HasExpansion(s_zoneinfo[i].expansion))
 		{
