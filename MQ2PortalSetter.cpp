@@ -108,7 +108,7 @@ const std::vector<zonePortalInfo> s_zoneinfo = {
 	{ "feerrott2", "The Feerrott (B)", "Feerrott: The Dream", "Crystallized Dream of the Feerrott", EXPANSION_HoT },
 	{ "brellsrest", "Brell's Rest", "Brell's Rest", "Unrefined Brellium Ore", EXPANSION_UFT },
 	{ "dragonscale", "Dragonscale Hills", "Dragonscale Hills", "Dragonscale Faycite", EXPANSION_SoF },
-	{ "potime", "The Plane of Time", "Plane of Time", "Broken Timestone", EXPANSION_DoN },
+	{ "potimea", "The Plane of Time", "Plane of Time", "Broken Timestone", EXPANSION_DoN },
 	{ "kattacastrum", "Katta Castrum", "Katta", "Katta Castrum Powerstone", EXPANSION_TBS },
 	{ "mesa", "Gor`Kar Mesa", "Goru`kar Mesa", "Goru'kar Mesa Sandstone", EXPANSION_TSS }, // ' and not ` for the "Goru'kar mesa sandstone"
 	{ "arcstone", "Arcstone", "Arcstone", "Arcstone Spirit Sapphire", EXPANSION_PoR },
