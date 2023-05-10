@@ -23,6 +23,7 @@ bool bDisplaySearch = true;
 bool bGroupZonesByEra = false;
 
 std::string portalStoneName;
+#define PLUGINMSG "\ar[\a-tPortal Setter\ar]\ao:: "
 
 struct zonePortalInfo
 {
@@ -296,6 +297,10 @@ void ImGui_OnUpdate()
 
 	ImGui::SetNextWindowSize(ImVec2(400, 440), ImGuiCond_FirstUseEver);
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
+	ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarRounding, 50);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
+
 	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_None))
 	{
 		if (ImGui::BeginTabBar("PortalSetterTab", ImGuiTabBarFlags_None))
@@ -315,6 +320,7 @@ void ImGui_OnUpdate()
 			ImGui::EndTabBar();
 		}
 	}
+	ImGui::PopStyleVar(3);
 	ImGui::End();
 }
 
@@ -365,13 +371,13 @@ void setPortal(const std::string& setPortalStoneName) {
 	switch (currentRoutineStep) {
 		case 1: {
 			if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
-				WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
+				WriteChatf(PLUGINMSG "\ayYour cursor must be empty to use portal setter.");
 				currentRoutineStep = 0;
 			} else if (GetFreeInventory(0) < 1) {
-				WriteChatColor("[MQ2PortalSetter] You must have a free inventory slot to use portal setter.", CONCOLOR_YELLOW);
+				WriteChatf(PLUGINMSG, "\ayYou must have a free inventory slot to use portal setter.");
 				currentRoutineStep = 0;
 			} else if (FindInventoryItemCountByName(setPortalStoneName.c_str()) > 0) {
-				WriteChatf("[MQ2PortalSetter] Using existing %s", setPortalStoneName.c_str());
+				WriteChatf(PLUGINMSG "\ayUsing existing %s", setPortalStoneName.c_str());
 				currentRoutineStep = 3;
 			} else {
 				if (CXWnd* merchantwnd = pMerchantWnd)
@@ -464,6 +470,14 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 
 	if (Arg[0] != '\0')
 	{
+		// if we used a slash command to set the portal, but we don't have a vendorID, it is because we are not currently inside the vendor
+		// or somehow there is no vendor
+		if (!vendorID) {
+			WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found, or you are trying to use portalsetter by slash command but do not have the vendor open.");
+			WriteChatf(PLUGINMSG "\arPlease open the portal vendor to set your choice by the /portalsetter slash command.");
+			return;
+		}
+
 		for (const zonePortalInfo& info : s_zoneinfo)
 		{
 			if (ci_equals(Arg, info.shortname) || ci_equals(Arg, info.longname))
@@ -474,8 +488,8 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 		}
 	}
 
-	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arPlease provide a long or shortname for the zone you wish to set to portal to.");
-	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \ayExample: \ao /portalsetter eastwastetwo \ax or \ao /portalsetter \ay\"The Eastern Wastes\"");
+	WriteChatf(PLUGINMSG "\arPlease provide a long or shortname for the zone you wish to set to portal to.");
+	WriteChatf(PLUGINMSG "\ayExample: \ao/portalsetter eastwastetwo \axor \ao/portalsetter \ayThe Eastern Wastes");
 }
 
 PLUGIN_API void InitializePlugin()
@@ -511,7 +525,13 @@ PLUGIN_API void OnPulse()
 		//-- If we are out of range then reset state.
 		if (currentRoutineStep > 0 && !inPortalMerchantRange())
 		{
-			WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arOut of range of portal attendant, aborting.");
+			if (vendorID) {
+				WriteChatf(PLUGINMSG "\arOut of range of portal attendant, aborting.");
+			}
+			else {
+				WriteChatf(PLUGINMSG "\arYou don't have a vendorID, which means one was not found, or you are trying to use portalsetter by slash command.");
+				WriteChatf(PLUGINMSG "\arPlease open the portal vendor to set your choice by slash command.");
+			}
 			bShowWindow = false;
 			currentRoutineStep = 0;
 		}
