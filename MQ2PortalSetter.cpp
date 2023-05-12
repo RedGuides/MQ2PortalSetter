@@ -23,7 +23,7 @@ bool bDisplaySearch = true;
 bool bGroupZonesByEra = false;
 
 std::string portalStoneName;
-#define PLUGINMSG "\ar[\a-tPortal Setter\ar]\ao:: "
+#define PLUGINMSG "\ar[\a-tPortal Setter\ar]\ao::\ax "
 
 struct zonePortalInfo
 {
@@ -472,7 +472,7 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 	{
 		// if we used a slash command to set the portal, but we don't have a vendorID, it is because we are not currently inside the vendor
 		// or somehow there is no vendor
-		if (!vendorID) {
+		if (SetAndGetVendorID() > 0) {
 			WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found, or you are trying to use portalsetter by slash command but do not have the vendor open.");
 			WriteChatf(PLUGINMSG "\arPlease open the portal vendor to set your choice by the /portalsetter slash command.");
 			return;
@@ -525,7 +525,7 @@ PLUGIN_API void OnPulse()
 		//-- If we are out of range then reset state.
 		if (currentRoutineStep > 0 && !inPortalMerchantRange())
 		{
-			if (vendorID) {
+			if (SetAndGetVendorID() > 0) {
 				WriteChatf(PLUGINMSG "\arOut of range of portal attendant, aborting.");
 			}
 			else {
