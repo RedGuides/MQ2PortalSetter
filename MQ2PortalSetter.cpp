@@ -333,13 +333,37 @@ PlayerClient* GetVendorSpawn() {
 	return GetSpawnByPartialName("Teleportation Assistant");
 }
 
+const std::vector<const char*> vendorNames = {
+	"Teleportation Assistant",
+	"Zeflmin Werlikanin"
+};
+
 bool SpawnMatchesVendor() {
 
 	char szCleanName[EQ_MAX_NAME] = { 0 };
 	strcpy_s(szCleanName, pActiveMerchant->Name);
 	CleanupName(szCleanName, sizeof(szCleanName), false, false);
 
-	return string_equals(szCleanName, "Teleportation Assistant") || string_equals(szCleanName, "Zeflmin Werlikanin");
+	return string_equals(szCleanName, vendorNames.at(0)) || string_equals(szCleanName, vendorNames.at(1));
+}
+
+void TargetAndOpenVendor() {
+	PlayerClient* vendor = nullptr;
+
+	if (vendor = GetSpawnByID(vendorID)) {
+		Target(pLocalPlayer, vendor->Name);
+	}
+
+	if (pTarget && vendor && pTarget->SpawnID == vendor->SpawnID) {
+		if (pMerchantWnd ? !pMerchantWnd->IsVisible() : false) {
+#ifndef ROF2EMU
+			// only Live has /usetarget
+			EzCommand("/usetarget");
+#else
+			EzCommand("/click right target");
+#endif
+		}
+	}
 }
 
 int SetAndGetVendorID() {
@@ -352,6 +376,14 @@ int SetAndGetVendorID() {
 		else
 		{
 			vendorID = 0;
+		}
+	}
+	else {
+		for (const auto& x : vendorNames) {
+			// this requires using partial name due to (Teleportation Assistant) LastName
+			if (PlayerClient* vendorSpawn = GetSpawnByPartialName(x)) {
+				vendorID = vendorSpawn->SpawnID;
+			}
 		}
 	}
 
@@ -370,6 +402,16 @@ bool inPortalMerchantRange() {
 void setPortal(const std::string& setPortalStoneName) {
 	switch (currentRoutineStep) {
 		case 1: {
+			if (SetAndGetVendorID() > 0) {
+				TargetAndOpenVendor();
+				// only go on to next step if we have the merchant wnd open
+				if (pMerchantWnd && pMerchantWnd->IsVisible()) {
+					currentRoutineStep++;
+				}
+			}
+			break;
+		}
+		case 2: {
 			if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
 				WriteChatf(PLUGINMSG "\ayYour cursor must be empty to use portal setter.");
 				currentRoutineStep = 0;
@@ -378,7 +420,7 @@ void setPortal(const std::string& setPortalStoneName) {
 				currentRoutineStep = 0;
 			} else if (FindInventoryItemCountByName(setPortalStoneName.c_str()) > 0) {
 				WriteChatf(PLUGINMSG "\ayUsing existing %s", setPortalStoneName.c_str());
-				currentRoutineStep = 3;
+				currentRoutineStep = 4;
 			} else {
 				if (CXWnd* merchantwnd = pMerchantWnd)
 				{
@@ -399,13 +441,13 @@ void setPortal(const std::string& setPortalStoneName) {
 			}
 			break;
 		}
-		case 2: {
+		case 3: {
 			EzCommand("/ctrl /notify MerchantWnd MW_Buy_Button leftmouseup");
 			currentRoutineStep++;
 			break;
 		}
-		case 3: {
-			if(FindItemByName(setPortalStoneName.c_str(), true)) {
+		case 4: {
+			if (FindItemByName(setPortalStoneName.c_str(), true)) {
 				char zNotifyCommand[MAX_STRING];
 				SendWndClick("MerchantWnd", "MW_DONE_BUTTON", "leftmouseup");
 				sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", setPortalStoneName.c_str());
@@ -414,7 +456,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			}
 			break;
 		}
-		case 4: {
+		case 5: {
 			if (PlayerClient* vendor = GetSpawnByID(vendorID))
 			{
 				Target(pLocalPlayer, vendor->Name);
@@ -422,7 +464,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			currentRoutineStep++;
 			break;
 		}
-		case 5: {
+		case 6: {
 			if (pTarget && inPortalMerchantRange()) {
 				if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
 					EzCommand("/click left target");
