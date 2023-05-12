@@ -473,13 +473,13 @@ void setPortal(const std::string& setPortalStoneName) {
 			} else {
 				currentRoutineStep--;
 			}
-			if (pGiveWnd->IsVisible() && currentRoutineStep == 5) {
+			if (pGiveWnd->IsVisible() && currentRoutineStep == 6) {
 				bShowWindow = true;
 				currentRoutineStep++;
 			}
 			break;
 		}
-		case 6: {
+		case 7: {
 			if (pGiveWnd->IsVisible()) {
 				SendWndClick("GiveWnd", "GVW_Give_Button", "leftmouseup");
 				currentRoutineStep++;
@@ -488,8 +488,8 @@ void setPortal(const std::string& setPortalStoneName) {
 			}
 			break;
 		}
-		case 7: {
-			if(!pGiveWnd->IsVisible()) {
+		case 8: {
+			if (!pGiveWnd->IsVisible()) {
 				currentRoutineStep = 0;
 			}
 			break;
@@ -514,9 +514,8 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 	{
 		// if we used a slash command to set the portal, but we don't have a vendorID, it is because we are not currently inside the vendor
 		// or somehow there is no vendor
-		if (SetAndGetVendorID() > 0) {
-			WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found, or you are trying to use portalsetter by slash command but do not have the vendor open.");
-			WriteChatf(PLUGINMSG "\arPlease open the portal vendor to set your choice by the /portalsetter slash command.");
+		if (SetAndGetVendorID() == 0) {
+			WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found.");
 			return;
 		}
 
@@ -571,8 +570,7 @@ PLUGIN_API void OnPulse()
 				WriteChatf(PLUGINMSG "\arOut of range of portal attendant, aborting.");
 			}
 			else {
-				WriteChatf(PLUGINMSG "\arYou don't have a vendorID, which means one was not found, or you are trying to use portalsetter by slash command.");
-				WriteChatf(PLUGINMSG "\arPlease open the portal vendor to set your choice by slash command.");
+				WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found.");
 			}
 			bShowWindow = false;
 			currentRoutineStep = 0;
