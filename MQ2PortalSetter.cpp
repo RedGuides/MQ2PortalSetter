@@ -530,7 +530,7 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 	}
 
 	WriteChatf(PLUGINMSG "\arPlease provide a long or shortname for the zone you wish to set to portal to.");
-	WriteChatf(PLUGINMSG "\ayExample: \ao/portalsetter eastwastetwo \axor \ao/portalsetter \ayThe Eastern Wastes");
+	WriteChatf(PLUGINMSG "\ayExample: \ao/portalsetter eastwastestwo \axor \ao/portalsetter \ayThe Eastern Wastes");
 }
 
 PLUGIN_API void InitializePlugin()
