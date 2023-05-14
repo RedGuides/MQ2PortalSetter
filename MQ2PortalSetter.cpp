@@ -391,6 +391,9 @@ int SetAndGetVendorID() {
 }
 
 bool inPortalMerchantRange() {
+	// If we are checking if the portal merchant is in range, we should make sure we have one first.
+	if (!vendorID)
+		SetAndGetVendorID();
 	if (PlayerClient* vendor = GetSpawnByID(vendorID))
 	{
 		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
