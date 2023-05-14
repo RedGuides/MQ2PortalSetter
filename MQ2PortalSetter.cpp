@@ -23,7 +23,7 @@ bool bDisplaySearch = true;
 bool bGroupZonesByEra = false;
 
 std::string portalStoneName;
-#define PLUGINMSG "\ar[\a-tPortal Setter\ar]\ao::\ax "
+#define PLUGINMSG "\ar[\a-tPortal Setter\ar]\ao::\aw "
 
 struct zonePortalInfo
 {
