@@ -23,6 +23,7 @@ bool bDisplaySearch = true;
 bool bGroupZonesByEra = false;
 
 std::string portalStoneName;
+#define PLUGINMSG "\ar[\a-tPortal Setter\ar]\ao::\aw "
 
 struct zonePortalInfo
 {
@@ -296,6 +297,10 @@ void ImGui_OnUpdate()
 
 	ImGui::SetNextWindowSize(ImVec2(400, 440), ImGuiCond_FirstUseEver);
 
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 10);
+	ImGui::PushStyleVar(ImGuiStyleVar_ScrollbarRounding, 50);
+	ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5);
+
 	if (ImGui::Begin("Portal Setter", &bShowWindow, ImGuiWindowFlags_None))
 	{
 		if (ImGui::BeginTabBar("PortalSetterTab", ImGuiTabBarFlags_None))
@@ -315,6 +320,7 @@ void ImGui_OnUpdate()
 			ImGui::EndTabBar();
 		}
 	}
+	ImGui::PopStyleVar(3);
 	ImGui::End();
 }
 
@@ -327,13 +333,37 @@ PlayerClient* GetVendorSpawn() {
 	return GetSpawnByPartialName("Teleportation Assistant");
 }
 
+const std::vector<const char*> vendorNames = {
+	"Teleportation Assistant",
+	"Zeflmin Werlikanin"
+};
+
 bool SpawnMatchesVendor() {
 
 	char szCleanName[EQ_MAX_NAME] = { 0 };
 	strcpy_s(szCleanName, pActiveMerchant->Name);
 	CleanupName(szCleanName, sizeof(szCleanName), false, false);
 
-	return string_equals(szCleanName, "Teleportation Assistant") || string_equals(szCleanName, "Zeflmin Werlikanin");
+	return string_equals(szCleanName, vendorNames.at(0)) || string_equals(szCleanName, vendorNames.at(1));
+}
+
+void TargetAndOpenVendor() {
+	PlayerClient* vendor = nullptr;
+
+	if (vendor = GetSpawnByID(vendorID)) {
+		Target(pLocalPlayer, vendor->Name);
+	}
+
+	if (pTarget && vendor && pTarget->SpawnID == vendor->SpawnID) {
+		if (pMerchantWnd ? !pMerchantWnd->IsVisible() : false) {
+#ifndef ROF2EMU
+			// only Live has /usetarget
+			EzCommand("/usetarget");
+#else
+			EzCommand("/click right target");
+#endif
+		}
+	}
 }
 
 int SetAndGetVendorID() {
@@ -348,11 +378,22 @@ int SetAndGetVendorID() {
 			vendorID = 0;
 		}
 	}
+	else {
+		for (const auto& x : vendorNames) {
+			// this requires using partial name due to (Teleportation Assistant) LastName
+			if (PlayerClient* vendorSpawn = GetSpawnByPartialName(x)) {
+				vendorID = vendorSpawn->SpawnID;
+			}
+		}
+	}
 
 	return vendorID;
 }
 
 bool inPortalMerchantRange() {
+	// If we are checking if the portal merchant is in range, we should make sure we have one first.
+	if (!vendorID)
+		SetAndGetVendorID();
 	if (PlayerClient* vendor = GetSpawnByID(vendorID))
 	{
 		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
@@ -364,15 +405,25 @@ bool inPortalMerchantRange() {
 void setPortal(const std::string& setPortalStoneName) {
 	switch (currentRoutineStep) {
 		case 1: {
+			if (SetAndGetVendorID() > 0) {
+				TargetAndOpenVendor();
+				// only go on to next step if we have the merchant wnd open
+				if (pMerchantWnd && pMerchantWnd->IsVisible()) {
+					currentRoutineStep++;
+				}
+			}
+			break;
+		}
+		case 2: {
 			if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
-				WriteChatColor("[MQ2PortalSetter] Your cursor must be empty to use portal setter.", CONCOLOR_YELLOW);
+				WriteChatf(PLUGINMSG "\ayYour cursor must be empty to use portal setter.");
 				currentRoutineStep = 0;
 			} else if (GetFreeInventory(0) < 1) {
-				WriteChatColor("[MQ2PortalSetter] You must have a free inventory slot to use portal setter.", CONCOLOR_YELLOW);
+				WriteChatf(PLUGINMSG, "\ayYou must have a free inventory slot to use portal setter.");
 				currentRoutineStep = 0;
 			} else if (FindInventoryItemCountByName(setPortalStoneName.c_str()) > 0) {
-				WriteChatf("[MQ2PortalSetter] Using existing %s", setPortalStoneName.c_str());
-				currentRoutineStep = 3;
+				WriteChatf(PLUGINMSG "\ayUsing existing %s", setPortalStoneName.c_str());
+				currentRoutineStep = 4;
 			} else {
 				if (CXWnd* merchantwnd = pMerchantWnd)
 				{
@@ -393,13 +444,13 @@ void setPortal(const std::string& setPortalStoneName) {
 			}
 			break;
 		}
-		case 2: {
+		case 3: {
 			EzCommand("/ctrl /notify MerchantWnd MW_Buy_Button leftmouseup");
 			currentRoutineStep++;
 			break;
 		}
-		case 3: {
-			if(FindItemByName(setPortalStoneName.c_str(), true)) {
+		case 4: {
+			if (FindItemByName(setPortalStoneName.c_str(), true)) {
 				char zNotifyCommand[MAX_STRING];
 				SendWndClick("MerchantWnd", "MW_DONE_BUTTON", "leftmouseup");
 				sprintf_s(zNotifyCommand, "/itemnotify \"%s\" leftmouseup", setPortalStoneName.c_str());
@@ -408,7 +459,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			}
 			break;
 		}
-		case 4: {
+		case 5: {
 			if (PlayerClient* vendor = GetSpawnByID(vendorID))
 			{
 				Target(pLocalPlayer, vendor->Name);
@@ -416,7 +467,7 @@ void setPortal(const std::string& setPortalStoneName) {
 			currentRoutineStep++;
 			break;
 		}
-		case 5: {
+		case 6: {
 			if (pTarget && inPortalMerchantRange()) {
 				if (GetPcProfile()->GetInventorySlot(InvSlot_Cursor)) {
 					EzCommand("/click left target");
@@ -425,13 +476,13 @@ void setPortal(const std::string& setPortalStoneName) {
 			} else {
 				currentRoutineStep--;
 			}
-			if (pGiveWnd->IsVisible() && currentRoutineStep == 5) {
+			if (pGiveWnd->IsVisible() && currentRoutineStep == 6) {
 				bShowWindow = true;
 				currentRoutineStep++;
 			}
 			break;
 		}
-		case 6: {
+		case 7: {
 			if (pGiveWnd->IsVisible()) {
 				SendWndClick("GiveWnd", "GVW_Give_Button", "leftmouseup");
 				currentRoutineStep++;
@@ -440,8 +491,8 @@ void setPortal(const std::string& setPortalStoneName) {
 			}
 			break;
 		}
-		case 7: {
-			if(!pGiveWnd->IsVisible()) {
+		case 8: {
+			if (!pGiveWnd->IsVisible()) {
 				currentRoutineStep = 0;
 			}
 			break;
@@ -464,6 +515,13 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 
 	if (Arg[0] != '\0')
 	{
+		// if we used a slash command to set the portal, but we don't have a vendorID, it is because we are not currently inside the vendor
+		// or somehow there is no vendor
+		if (SetAndGetVendorID() == 0) {
+			WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found.");
+			return;
+		}
+
 		for (const zonePortalInfo& info : s_zoneinfo)
 		{
 			if (ci_equals(Arg, info.shortname) || ci_equals(Arg, info.longname))
@@ -474,8 +532,8 @@ void PortalSetterCmd(SPAWNINFO* pChar, char* szLine)
 		}
 	}
 
-	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arPlease provide a long or shortname for the zone you wish to set to portal to.");
-	WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \ayExample: \ao /portalsetter eastwastetwo \ax or \ao /portalsetter \ay\"The Eastern Wastes\"");
+	WriteChatf(PLUGINMSG "\arPlease provide a long or shortname for the zone you wish to set to portal to.");
+	WriteChatf(PLUGINMSG "\ayExample: \ao/portalsetter eastwastestwo \axor \ao/portalsetter \ayThe Eastern Wastes");
 }
 
 PLUGIN_API void InitializePlugin()
@@ -511,7 +569,12 @@ PLUGIN_API void OnPulse()
 		//-- If we are out of range then reset state.
 		if (currentRoutineStep > 0 && !inPortalMerchantRange())
 		{
-			WriteChatf("\ar[\a-tMQ2PortalSetter\ar]\ao:: \arOut of range of portal attendant, aborting.");
+			if (SetAndGetVendorID() > 0) {
+				WriteChatf(PLUGINMSG "\arOut of range of portal attendant, aborting.");
+			}
+			else {
+				WriteChatf(PLUGINMSG "\arYou don't have a \ayvendorID\ax, which means one was not found.");
+			}
 			bShowWindow = false;
 			currentRoutineStep = 0;
 		}
