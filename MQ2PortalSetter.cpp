@@ -95,6 +95,7 @@ bool PortalData(const char* szIndex, MQTypeVar& Dest)
 // -- this was originally not done because for duplicate zones, we should likely *always* have displayed differences, example: Cobalt Scar
 // EXPANSION Info: Guild Hall (and thus porter) wasn't introduced until Dragons of Norrath.
 const std::vector<zonePortalInfo> s_zoneinfo = {
+	{ "laurioninn", "Laurion's Inn", "Laurion's Inn", "Medal of Heroes", EXPANSION_LS },
 	{ "sharvahltwo", "Shar Vahl, Divided", "Shar Vahl (NoS)", "Tri-Spirit Embossed Token", EXPANSION_NOS },
 	{ "maidentwo", "Maiden's Eye", "Maiden's Eye (ToL)", "Gem of the Maiden's Tempest", EXPANSION_TOL },
 	{ "cobaltscartwo", "Cobalt Scar", "Cobalt Scar (CoV)", "Othmir Clamshell", EXPANSION_COV },
