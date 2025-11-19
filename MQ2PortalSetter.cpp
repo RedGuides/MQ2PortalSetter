@@ -31,7 +31,7 @@ struct zonePortalInfo
 	const char* longname;
 	const char* buttonname;
 	const char* stonename;
-	int expansion;
+	int64_t expansion;
 };
 
 std::vector<zonePortalInfo> displayableZones;
@@ -95,6 +95,10 @@ bool PortalData(const char* szIndex, MQTypeVar& Dest)
 // -- this was originally not done because for duplicate zones, we should likely *always* have displayed differences, example: Cobalt Scar
 // EXPANSION Info: Guild Hall (and thus porter) wasn't introduced until Dragons of Norrath.
 const std::vector<zonePortalInfo> s_zoneinfo = {
+
+#ifdef EXPANSION_SOR
+	{ "embattledpogrowth", "Scarred Grove", "Scarred Grove", "Charred Rune-Etched Stone", EXPANSION_SOR },
+#endif
 #ifdef EXPANSION_TOB
 	{ "hodstock", "Hodstock Hills", "Hodstock Hills", "Broken Auretite Chain", EXPANSION_TOB },
 #endif
