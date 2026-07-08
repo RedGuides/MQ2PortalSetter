@@ -404,7 +404,7 @@ bool inPortalMerchantRange() {
 		SetAndGetVendorID();
 	if (PlayerClient* vendor = GetSpawnByID(vendorID))
 	{
-		return Distance3DToSpawn(pLocalPlayer, vendor) <= 20.0;
+		return GetDistance3D(pLocalPlayer, vendor) <= 20.0;
 	}
 
 	return false;
