@@ -10,13 +10,11 @@ Members show the progress of PortalSetter
 
 ## Members
 <!--dt-members-start-->
-### {{ renderMember(type='int', name='Step') }}
+/// member | int Step
+///
 
-:   
-
-### {{ renderMember(type='bool', name='InProgress') }}
-
-:   
+/// member | bool InProgress
+///
 
 <!--dt-members-end-->
 

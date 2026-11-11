@@ -10,9 +10,8 @@ Access PortalSetter datatypes
 
 ## Forms
 <!--tlo-forms-start-->
-### {{ renderMember(type='PortalSetter', name='PortalSetter') }}
-
-:   
+/// member | PortalSetter PortalSetter
+///
 
 <!--tlo-forms-end-->
 
